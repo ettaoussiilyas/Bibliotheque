@@ -27,16 +27,5 @@ class Book {
         return $stmt;
     }
 
-    public function getBookDetails($id) {
-        $query = "SELECT b.*, c.name as category_name 
-                 FROM " . $this->table_name . " b
-                 LEFT JOIN categories c ON b.category_id = c.id
-                 WHERE b.id = ?";
-                 
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(1, $id);
-        $stmt->execute();
-        return $stmt;
-    }
 }
 ?> 
