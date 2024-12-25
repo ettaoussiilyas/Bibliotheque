@@ -17,7 +17,7 @@ class DataBase{
         // self::$conn = null;
         try{
             $this->conn = new PDO("mysql:host=".$this->host.";dbname=".$this->db_name, $this->username, $this->password, $this->options);
-            echo "Connected successfully";
+            // echo "Connected successfully";
         }catch(PDOException $exception){
             echo "Connection error: ".$exception->getMessage();
         }
