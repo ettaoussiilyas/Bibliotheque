@@ -155,5 +155,15 @@ class Book {
 
     }
 
+    public function deleteBook($id){
+        $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([
+            'id' => $id
+        ]);
+        return $stmt;
+
+    }
+
 }
 ?> 
