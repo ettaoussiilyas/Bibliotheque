@@ -132,5 +132,28 @@ class Book {
         }
     }
 
+    public function addBook($title , $author, $category_id , $cover_image , $summary , $status) {
+        $this->title = $title;
+        $this->author = $author;
+        $this->category_id = $category_id;
+        $this->cover_image = $cover_image;
+        $this->summary = $summary;
+        $this->status = $status;
+        $this->created_at = date('Y-m-d H:i:s');
+        $query = "INSERT INTO " . $this->table_name . " (title, author, category_id, cover_image, summary, status, created_at) VALUES (:title, :author, :category_id, :cover_image, :summary, :status, :created_at)";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([
+            'title' => $title,
+            'author' => $author,
+            'category_id' => $category_id,
+            'cover_image' => $cover_image,
+            'summary' => $summary,
+            'status' => $status,
+            'created_at'=> $this->created_at
+        ]);
+        return $stmt;
+
+    }
+
 }
 ?> 
