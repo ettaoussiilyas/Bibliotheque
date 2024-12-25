@@ -15,7 +15,7 @@ class User{
 
 
     public function __construct($name, $email, $password){
-        $this->name = $name;
+        $this->name = $name ?: null;
         $this->email = $email;
         $this->password = $password;
         $this->role = 'authenticated';
@@ -38,4 +38,37 @@ class User{
         $this->db->disconnect();
         
     }
+
+    public function login() {
+        $this->db = new DataBase();
+        $this->conn = $this->db->getConnection();
+    
+        $query = "SELECT id,email, password, role FROM users WHERE email = :email";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':email', $this->email);
+    
+        if ($stmt->execute()) {
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($user && ($this->password === $user['password'])) {
+                return [
+                    'success' => true,
+                    'role' => $user['role'],
+                    'id' => $user['id'],
+                    'email' => $user['email']
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'Invalid email or password.'
+                ];
+            }
+        }
+        return [
+            'success' => false,
+            'message' => 'An error occurred during login.'
+        ];
+    
+        $this->db->disconnect(); 
+    }
+    
 }
