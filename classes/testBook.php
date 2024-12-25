@@ -30,6 +30,14 @@ $book = new Book($conn);
 // }
 
 /******************delete book********************* */
-
+// INSERT INTO books (title, author, category_id, cover_image, summary, status) VALUES
+// (
+//     'The Great Gatsby',
+//     'F. Scott Fitzgerald',
+//     1,  -- Assuming category_id 1 exists (e.g., 'Fiction')
+//     'gatsby_cover.jpg',
+//     'A story of decadence and excess, exploring the American Dream through the eyes of Nick Carraway and the mysterious millionaire Jay Gatsby.',
+//     'available'
+// )
 
 ?>
