@@ -1,4 +1,7 @@
 module.exports = {
+  content: [
+    '*.{html,js,php}',
+  ],
     colors: {
    'text': {
      50: '#f2fce8',
