@@ -11,6 +11,17 @@ $books = $book->getAllBooks();
 if (!$books) {
     die("Erreur lors de la récupération des livres");
 }
+
+//search
+#search book scope
+
+
+if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+        $book->handleAjaxRequest();
+    exit;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -22,6 +33,8 @@ if (!$books) {
     <title>Bibliothèque - Catalogue</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!--for search part-->
+    <link rel="stylesheet" href="./style/index.css"> <!--for search part-->
 </head>
 
 <body class="bg-gray-100">
@@ -51,7 +64,14 @@ if (!$books) {
             <p class="text-xl">Explorez notre vaste sélection de livres et trouvez votre prochaine lecture</p>
         </div>
     </div>
-
+    <div class="search-container">
+        <input type="text" 
+               id="search" 
+               class="search-input" 
+               placeholder="Search for a book" 
+               name="query">
+        <div id="result"></div>
+    </div>
     <!-- Books Grid -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

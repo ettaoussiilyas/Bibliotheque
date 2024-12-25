@@ -1,0 +1,41 @@
+.search-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    /* display: flex;
+    justify-content: center; */
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.book-item {
+    padding: 15px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+.book-item h3 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+.book-item p {
+    margin: 0;
+    color: #666;
+}
+
+#result{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+}

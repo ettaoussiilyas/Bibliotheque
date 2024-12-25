@@ -2,7 +2,7 @@
 require_once '../config/db.php';
 
 class BookSearch {
-    private $db;
+    private $db; 
     private $conn;
     
     public function __construct() {
@@ -33,6 +33,7 @@ class BookSearch {
                 $output .= "<div class='book-item'>";
                 $output .= "<h3>" . htmlspecialchars($book['title']) . "</h3>";
                 $output .= "<p>Author: " . htmlspecialchars($book['author']) . "</p>";
+                $output .= "<img src='" . htmlspecialchars($book['cover_image']) . "' alt='" . htmlspecialchars($book['title']) . "' style='max-width: 100%; height: auto;'>";
                 $output .= "</div>";
             }
         } else {
