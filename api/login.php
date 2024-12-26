@@ -8,6 +8,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     $user = new User(null, $data->email, $data->password);
     $logged = $user->login();
     if($logged['success']){
+        $_SESSION['name'] =$logged['name'];
         $_SESSION['id'] = $logged['id'];
         $_SESSION['role'] = $logged['role'];
         $_SESSION['email'] = $logged['email'];
