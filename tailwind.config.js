@@ -1,6 +1,7 @@
 module.exports = {
   content: [
     '*.{html,js,php}',
+    './admin/*.{html,js,php}',
   ],
     colors: {
    'text': {

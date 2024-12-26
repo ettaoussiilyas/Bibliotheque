@@ -37,7 +37,7 @@ CREATE TABLE borrowings (
     user_id INT NOT NULL,
     book_id INT NOT NULL,
     borrow_date DATE NOT NULL,
-    due_date DATE NOT NULL,
+    due_date DATE DEFAULT NULL,
     return_date DATE DEFAULT NULL,
     notification_sent TINYINT(1) DEFAULT 0, -- 1 si un e-mail a été envoyé
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
