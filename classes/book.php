@@ -105,10 +105,19 @@ class Book {
                         "class='bg-[#3498DB] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[#2980B9] transition-colors duration-300'>" .
                         "<i class='fas fa-info-circle mr-1'></i>Détails</a>";
                 
-                // Borrow Button
-                $output .= "<a href='login.php' " .
-                        "class='bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300'>" .
-                        "<i class='fas fa-book-reader mr-1'></i>Emprunter</a>";
+                // Déterminer la page courante
+                $current_page = basename($_SERVER['PHP_SELF']);
+                
+                // Borrow Button avec if/else
+                if ($current_page === 'user.php') {
+                    $output .= "<a href='reservation.php?book_id=" . $book['id'] . "' " .
+                               "class='bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300'>" .
+                               "<i class='fas fa-book-reader mr-1'></i>Emprunter</a>";
+                } else {
+                    $output .= "<a href='login.php' " .
+                               "class='bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300'>" .
+                               "<i class='fas fa-book-reader mr-1'></i>Emprunter</a>";
+                }
                 
                 $output .= "</div>"; // Close buttons container
                 $output .= "</div>"; // Close book details section

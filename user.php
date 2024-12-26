@@ -17,9 +17,11 @@ if (!$books) {
 #search book scope
 
 
-if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && 
-    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
-        $book->handleAjaxRequest();
+if (
+    isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
+) {
+    $book->handleAjaxRequest();
     exit;
 }
 
@@ -40,12 +42,21 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
 
 <body class="bg-gray-100">
     <!-- Navigation -->
-  <nav class="bg-[#2C3E50] shadow-lg">
+    <nav class="bg-[#2C3E50] shadow-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
-                <a class="text-white text-2xl font-bold flex items-center" href="user.php">
-                    <i class="fas fa-book-reader mr-2"></i>Bibliothèque
-                </a>
+                <div class="flex items-center space-x-4">
+                    <a class="text-white text-2xl font-bold flex items-center" href="user.php">
+                        <i class="fas fa-book-reader mr-2"></i>Bibliothèque
+                    </a>
+                    <!-- Nouveaux liens -->
+                    <a href="user.php" class="text-white hover:text-[#E74C3C] transition-colors duration-300">
+                        <i class="fas fa-home mr-1"></i> Accueil
+                    </a>
+                    <a href="reservation.php" class="text-white hover:text-[#E74C3C] transition-colors duration-300">
+                        <i class="fas fa-bookmark mr-1"></i> Mes Emprunts
+                    </a>
+                </div>
                 <div class="flex space-x-4">
                     <span class="text-white flex items-center">
                         <i class="fas fa-user mr-1"></i>
@@ -67,11 +78,11 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
         </div>
     </div>
     <div class="search-container">
-        <input type="text" 
-               id="search" 
-               class="search-input" 
-               placeholder="Search for a book" 
-               name="query">
+        <input type="text"
+            id="search"
+            class="search-input"
+            placeholder="Search for a book"
+            name="query">
         <div id="result"></div>
     </div>
     <!-- Books Grid -->
@@ -121,7 +132,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
                                 <i class="fas fa-info-circle mr-1"></i>
                                 Détails
                             </a>
-                            <a href="login.php"
+                            <a href="reservation.php?book_id=<?php echo $book['id']; ?>"
                                 class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300">
                                 <i class="fas fa-book-reader mr-1"></i>
                                 Emprunter
@@ -169,7 +180,8 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
                     </div>
                 </div>
                 <div class="mt-6 flex justify-end">
-                    <a href="login.php" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full text-sm font-medium transition-colors duration-300">
+                    <a href="reservation.php?book_id=<?php echo $book['id']; ?>"
+                        class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300">
                         <i class="fas fa-book-reader mr-1"></i>
                         Emprunter
                     </a>
@@ -178,7 +190,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
         </div>
     </div>
 
-<script src="javascript/index.js" ></script>
+    <script src="javascript/index.js"></script>
 </body>
 
 </html>
