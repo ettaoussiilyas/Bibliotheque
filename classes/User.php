@@ -43,7 +43,7 @@ class User{
         $this->db = new DataBase();
         $this->conn = $this->db->getConnection();
     
-        $query = "SELECT id,email, password, role FROM users WHERE email = :email";
+        $query = "SELECT name,id,email, password, role FROM users WHERE email = :email";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':email', $this->email);
     
@@ -54,7 +54,8 @@ class User{
                     'success' => true,
                     'role' => $user['role'],
                     'id' => $user['id'],
-                    'email' => $user['email']
+                    'email' => $user['email'],
+                    'name' => $user['name']
                 ];
             } else {
                 return [
