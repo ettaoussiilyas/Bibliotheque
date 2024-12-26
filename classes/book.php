@@ -12,6 +12,10 @@ class Book {
     public $status;
     public $created_at;
 
+    //adding data
+    public $adding_erreur = array();
+    // private $data = array();
+
     public function __construct($conn) {
         $this->conn = $conn;
     }
@@ -125,34 +129,93 @@ class Book {
 
     //ajax handling
     public function handleAjaxRequest() {
-        if (isset($_POST['query'])) {
-            $results = $this->searchBooks($_POST['query']);
+        if (isset($data['query'])) {
+            $results = $this->searchBooks($data['query']);
             echo $this->renderResults($results);
             exit;
         }
     }
+    public function getErrors() {
+        return !empty($this->adding_erreur) ? $this->adding_erreur : [];
+    }
 
-    public function addBook($title , $author, $category_id , $cover_image , $summary , $status) {
-        $this->title = $title;
-        $this->author = $author;
-        $this->category_id = $category_id;
-        $this->cover_image = $cover_image;
-        $this->summary = $summary;
-        $this->status = $status;
-        $this->created_at = date('Y-m-d H:i:s');
-        $query = "INSERT INTO " . $this->table_name . " (title, author, category_id, cover_image, summary, status, created_at) VALUES (:title, :author, :category_id, :cover_image, :summary, :status, :created_at)";
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute([
-            'title' => $title,
-            'author' => $author,
-            'category_id' => $category_id,
-            'cover_image' => $cover_image,
-            'summary' => $summary,
-            'status' => $status,
-            'created_at'=> $this->created_at
-        ]);
-        return $stmt;
+    // Optional: Add a method to check if there are errors
+    public function hasErrors() {
+        return !empty($this->adding_erreur);
+    }
 
+    public function addBook($post) {
+        // Initialize error array
+        $this->adding_erreur = array();
+        
+        // Sanitize and validate inputs
+        $data = [
+            'title' => trim($post['title_add'] ?? ''),
+            'author' => trim($post['author_add'] ?? ''),
+            'category_id' => filter_var($post['category_id_add'] ?? '', FILTER_VALIDATE_INT),
+            'cover_image' => trim($post['cover_image_add'] ?? ''),
+            'summary' => trim($post['summary_add'] ?? ''),
+            'status' => trim($post['status_add'] ?? '')
+        ];
+
+        // Validation
+        if (empty($data['title']) || empty($data['author']) || 
+            empty($data['category_id']) || empty($data['cover_image']) || 
+            empty($data['summary']) || empty($data['status'])) {
+            $this->adding_erreur['empty'] = "Tous les champs sont obligatoires";
+            return false;
+        }
+
+        // Specific field validations
+        if (strlen($data['title']) < 3 || strlen($data['title']) > 255) {
+            $this->adding_erreur['title'] = "Le titre doit contenir entre 3 et 255 caractères";
+        }
+
+        if (strlen($data['author']) < 3 || strlen($data['author']) > 255) {
+            $this->adding_erreur['author'] = "Le nom de l'auteur doit contenir entre 3 et 255 caractères";
+        }
+
+        // Validate status (assuming specific allowed values)
+        $allowed_statuses = ['available', 'borrowed', 'reserved'];
+        if (!in_array($data['status'], $allowed_statuses)) {
+            $this->adding_erreur['status'] = "Statut invalide";
+        }
+
+        // If there are any errors, return false
+        if (!empty($this->adding_erreur)) {
+            return false;
+        }
+
+        try {
+            // Prepare the query
+            $query = "INSERT INTO " . $this->table_name . " 
+                    (title, author, category_id, cover_image, summary, status, created_at) 
+                    VALUES (:title, :author, :category_id, :cover_image, :summary, :status, :created_at)";
+            
+            $stmt = $this->conn->prepare($query);
+            
+            // Execute with sanitized data
+            $success = $stmt->execute([
+                'title' => $data['title'],
+                'author' => $data['author'],
+                'category_id' => $data['category_id'],
+                'cover_image' => $data['cover_image'],
+                'summary' => $data['summary'],
+                'status' => $data['status'],
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+
+            if ($success) {
+                return $this->conn->lastInsertId();
+            }
+            
+            $this->adding_erreur['database'] = "Erreur lors de l'ajout du livre";
+            return false;
+
+        } catch (PDOException $e) {
+            $this->adding_erreur['database'] = "Erreur de base de données: " . $e->getMessage();
+            return false;
+        }
     }
 
     public function deleteBook($id){
