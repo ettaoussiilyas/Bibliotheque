@@ -136,7 +136,7 @@ session_start();
         if (data.success) {
             switch (data.destination) {
                 case 'dashboard.php':
-                    document.location = './dashboard.php';
+                    document.location = './user.php';
                     break;
                 case 'admin/dashboard.php':
                     document.location = './admin/dashboard.php';

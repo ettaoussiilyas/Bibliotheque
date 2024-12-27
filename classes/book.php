@@ -1,9 +1,10 @@
 <?php
-class Book {
+class Book
+{
     private $conn;
     private $table_name = "books";
 
-    public $id; 
+    public $id;
     public $title;
     public $author;
     public $category_id;
@@ -16,23 +17,26 @@ class Book {
     public $adding_erreur = array();
     // private $data = array();
 
-    public function __construct($conn) {
+    public function __construct($conn)
+    {
         $this->conn = $conn;
     }
 
-    public function getAllBooks() {
+    public function getAllBooks()
+    {
         $query = "SELECT b.*, c.name as category_name 
                  FROM " . $this->table_name . " b
                  LEFT JOIN categories c ON b.category_id = c.id
                  ORDER BY b.created_at DESC";
-        
+
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt;
     }
 
     //search a book
-    public function searchBooks($searchTerm) {
+    public function searchBooks($searchTerm)
+    {
         if (empty($searchTerm)) {
             return [];
         }
@@ -43,14 +47,15 @@ class Book {
             'search_title' => "%$searchTerm%",
             'search_author' => "%$searchTerm%"
         ]);
-        
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     //runder book resullt
-    public function renderResults($results) {
+    public function renderResults($results)
+    {
         $output = '';
-        
+
         if (!empty($results)) {
             // foreach ($results as $book) {
             //     $output .= "<div class='book-item'>";
@@ -66,35 +71,35 @@ class Book {
                 $output .= "<div class='relative h-72'>";
                 if (!empty($book['cover_image'])) {
                     $output .= "<img src='" . htmlspecialchars($book['cover_image']) . "' " .
-                            "alt='" . htmlspecialchars($book['title']) . "' " .
-                            "class='absolute inset-0 w-full h-full object-contain p-2' " .
-                            "onerror=\"this.src='https://via.placeholder.com/200x300?text=Image+non+disponible'\">";
+                        "alt='" . htmlspecialchars($book['title']) . "' " .
+                        "class='absolute inset-0 w-full h-full object-contain p-2' " .
+                        "onerror=\"this.src='https://via.placeholder.com/200x300?text=Image+non+disponible'\">";
                 }
-                
+
                 // Status Badge
-                $statusClass = $book['status'] === 'available' ? 'bg-green-500' : 
-                            ($book['status'] === 'borrowed' ? 'bg-red-500' : 'bg-yellow-500');
-                $statusText = $book['status'] === 'available' ? 'Disponible' : 
-                            ($book['status'] === 'borrowed' ? 'Emprunté' : 'Réservé');
-                
+                $statusClass = $book['status'] === 'available' ? 'bg-green-500' :
+                    ($book['status'] === 'borrowed' ? 'bg-red-500' : 'bg-yellow-500');
+                $statusText = $book['status'] === 'available' ? 'Disponible' :
+                    ($book['status'] === 'borrowed' ? 'Emprunté' : 'Réservé');
+
                 $output .= "<div class='absolute top-2 right-2 {$statusClass} text-white px-3 py-1 rounded-full text-xs font-medium'>";
                 $output .= $statusText;
                 $output .= "</div>";
                 $output .= "</div>";
-                
+
                 // Book Details Section
                 $output .= "<div class='p-6'>";
                 $output .= "<h5 class='text-xl font-bold text-gray-800 mb-4'>" . htmlspecialchars($book['title']) . "</h5>";
                 $output .= "<div class='space-y-2 text-gray-600 mb-6'>";
-                $output .= "<p class='flex items-center'><i class='fas fa-user text-[#3498DB] mr-2'></i>" . 
-                        htmlspecialchars($book['author']) . "</p>";
-                $output .= "<p class='flex items-center'><i class='fas fa-bookmark text-[#3498DB] mr-2'></i>" . 
-                        (isset($book['category_name']) ? htmlspecialchars($book['category_name']) : 'Non catégorisé') . "</p>";
+                $output .= "<p class='flex items-center'><i class='fas fa-user text-[#3498DB] mr-2'></i>" .
+                    htmlspecialchars($book['author']) . "</p>";
+                $output .= "<p class='flex items-center'><i class='fas fa-bookmark text-[#3498DB] mr-2'></i>" .
+                    (isset($book['category_name']) ? htmlspecialchars($book['category_name']) : 'Non catégorisé') . "</p>";
                 $output .= "</div>";
-                
+
                 // Buttons Section
                 $output .= "<div class='flex justify-between items-center'>";
-                
+
                 // Details Button
                 $bookDetails = [
                     'title' => addslashes($book['title']),
@@ -104,42 +109,60 @@ class Book {
                     'cover_image' => addslashes($book['cover_image']),
                     'summary' => addslashes($book['summary'] ?? 'Aucun résumé disponible')
                 ];
-                
+
                 $output .= "<a href='#' onclick='showBookDetails(" . json_encode($bookDetails) . ")' " .
-                        "class='bg-[#3498DB] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[#2980B9] transition-colors duration-300'>" .
-                        "<i class='fas fa-info-circle mr-1'></i>Détails</a>";
-                
-                // Borrow Button
-                $output .= "<a href='login.php' " .
+                    "class='bg-[#3498DB] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[#2980B9] transition-colors duration-300'>" .
+                    "<i class='fas fa-info-circle mr-1'></i>Détails</a>";
+
+                // Déterminer la page courante
+                $current_page = basename($_SERVER['PHP_SELF']);
+
+                // Borrow Button avec if/else
+                if ($current_page === 'user.php') {
+                    $output .= "<a href='reservation.php?book_id=" . $book['id'] . "' " .
                         "class='bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300'>" .
                         "<i class='fas fa-book-reader mr-1'></i>Emprunter</a>";
-                
-                $output .= "</div>"; // closelose buttons container
-                $output .= "</div>"; // closelose book details section
-                $output .= "</div>"; // closelose main card container
+                } else {
+                    $output .= "<a href='login.php' " .
+                        "class='bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300'>" .
+                        "<i class='fas fa-book-reader mr-1'></i>Emprunter</a>";
+                }
+
+                $output .= "</div>"; // Close buttons container
+                $output .= "</div>"; // Close book details section
+                $output .= "</div>"; // Close main card container
             }
 
-            
+
         } else {
             $output = "No results found.";
         }
-        
+
         return $output;
     }
 
     //ajax handling
-    public function handleAjaxRequest() {
+    public function handleAjaxRequest()
+    {
         if (isset($data['query'])) {
             $results = $this->searchBooks($data['query']);
             echo $this->renderResults($results);
             exit;
         }
     }
-    public function getErrors() {
+    public function getErrors()
+    {
         return $this->adding_erreur;
     }
 
-    public function addBook($data) {
+    // Optional: Add a method to check if there are errors
+    public function hasErrors()
+    {
+        return !empty($this->adding_erreur);
+    }
+
+    public function addBook($data)
+    {
         // Réinitialiser les erreurs
         $this->adding_erreur = array();
 
@@ -178,7 +201,7 @@ class Book {
             $query = "INSERT INTO " . $this->table_name . " 
                     (title, author, category_id, cover_image, summary, status) 
                     VALUES (:title, :author, :category_id, :cover_image, :summary, :status)";
-            
+
             $stmt = $this->conn->prepare($query);
             $result = $stmt->execute([
                 'title' => $data['title'],
@@ -202,7 +225,8 @@ class Book {
         }
     }
 
-    public function deleteBook($id){
+    public function deleteBook($id)
+    {
         $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
         $stmt = $this->conn->prepare($query);
         $stmt->execute([
@@ -212,14 +236,16 @@ class Book {
 
     }
 
-    public function getBookById($id) {
+    public function getBookById($id)
+    {
         $query = "SELECT * FROM " . $this->table_name . " WHERE id = :id";
         $stmt = $this->conn->prepare($query);
         $stmt->execute(['id' => $id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function updateBook($data) {
+    public function updateBook($data)
+    {
         try {
             // Debug - Afficher les données reçues
             error_log("Données reçues dans updateBook: " . print_r($data, true));
@@ -252,7 +278,7 @@ class Book {
                         summary = :summary, 
                         status = :status 
                     WHERE id = :id";
-            
+
             $stmt = $this->conn->prepare($query);
             $result = $stmt->execute($updateData);
 
@@ -269,5 +295,14 @@ class Book {
         }
     }
 
+    public function borrowed()
+    {
+        $query = "SELECT COUNT(*) as count FROM books WHERE status = 'borrowed'";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
 }
-?> 
+?>

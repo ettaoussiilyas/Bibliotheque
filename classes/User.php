@@ -14,14 +14,11 @@ class User{
     private $conn;
 
 
-    public function __construct($name, $email, $password){
-        $this->name = $name ?: null;
+    public function register($name, $email, $password){
+        $this->name = $name;
         $this->email = $email;
         $this->password = $password;
         $this->role = 'authenticated';
-    }
-
-    public function register(){
         $this->db = new DataBase();
         $this->conn = $this->db->getConnection();
         $query = "INSERT INTO users(name, email, password, role) VALUES(:name, :email, :password, :role)";
@@ -39,11 +36,14 @@ class User{
         
     }
 
-    public function login() {
+    public function login($email, $password) {
+        $this->email = $email;
+        $this->password = $password;
+        $this->role = 'authenticated';
         $this->db = new DataBase();
         $this->conn = $this->db->getConnection();
     
-        $query = "SELECT id,email, password, role FROM users WHERE email = :email";
+        $query = "SELECT name,id,email, password, role FROM users WHERE email = :email";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':email', $this->email);
     
@@ -54,7 +54,8 @@ class User{
                     'success' => true,
                     'role' => $user['role'],
                     'id' => $user['id'],
-                    'email' => $user['email']
+                    'email' => $user['email'],
+                    'name' => $user['name']
                 ];
             } else {
                 return [
@@ -69,6 +70,30 @@ class User{
         ];
     
         $this->db->disconnect(); 
+    }
+
+    public function getAllUsers(){
+        $this->conn = null;
+        $this->db = new DataBase();
+        $this->conn = $this->db->getConnection();
+        $query = "SELECT name,email, role, created_at FROM users ORDER BY created_at DESC";
+        $stmt = $this->conn->prepare($query);
+        if ($stmt->execute()) {
+            $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $users;
+        }
+    }
+
+
+    public function delete($email){
+        $this->email = $email;
+        $this->conn = null;
+        $this->db = new DataBase();
+        $this->conn = $this->db->getConnection();
+        $query = "DELETE FROM users WHERE email = :email";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':email', $this->email);
+        return $stmt->execute() ? true : false;
     }
     
 }

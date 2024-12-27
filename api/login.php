@@ -5,9 +5,10 @@ include '../classes/User.php';
 if($_SERVER['REQUEST_METHOD'] === 'POST'){
     $json = file_get_contents('php://input');
     $data = json_decode($json);
-    $user = new User(null, $data->email, $data->password);
-    $logged = $user->login();
+    $user = new User();
+    $logged = $user->login($data->email, $data->password);
     if($logged['success']){
+        $_SESSION['name'] =$logged['name'];
         $_SESSION['id'] = $logged['id'];
         $_SESSION['role'] = $logged['role'];
         $_SESSION['email'] = $logged['email'];
