@@ -8,7 +8,7 @@ CREATE TABLE users (
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    role ENUM('admin', 'authenticated', 'visitor') DEFAULT 'visitor',
+    role ENUM('admin', 'authenticated') DEFAULT 'authenticated',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -37,7 +37,7 @@ CREATE TABLE borrowings (
     user_id INT NOT NULL,
     book_id INT NOT NULL,
     borrow_date DATE NOT NULL,
-    due_date DATE NOT NULL,
+    due_date DATE DEFAULT NULL,
     return_date DATE DEFAULT NULL,
     notification_sent TINYINT(1) DEFAULT 0, -- 1 si un e-mail a été envoyé
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -70,3 +70,32 @@ INSERT INTO books (title, author, category_id, cover_image, summary, status) VAL
 INSERT INTO borrowings (user_id, book_id, borrow_date, due_date) VALUES
 (2, 3, '2024-12-01', '2024-12-15'),
 (3, 4, '2024-12-05', '2024-12-20');
+
+#test de request
+/*INSERT INTO books (title, author, category_id, cover_image, summary, status) VALUES
+(
+    'The Great Gatsby',
+    'F. Scott Fitzgerald',
+    1,  -- Assuming category_id 1 exists (e.g., 'Fiction')
+    'gatsby_cover.jpg',
+    'A story of decadence and excess, exploring the American Dream through the eyes of Nick Carraway and the mysterious millionaire Jay Gatsby.',
+    'available'
+),
+
+(
+    '1984',
+    'George Orwell',
+    2,  -- Assuming category_id 2 exists (e.g., 'Science Fiction')
+    '1984_cover.jpg',
+    'A dystopian novel set in a totalitarian society, following Winston Smith as he rebels against the omnipresent government surveillance.',
+    'borrowed'
+),
+(
+    'Pride and Prejudice',
+    'Jane Austen',
+    3,  -- Assuming category_id 3 exists (e.g., 'Romance')
+    'pride_cover.jpg',
+    'A classic romance following the story of Elizabeth Bennet as she deals with issues of manners, upbringing, morality, and marriage.',
+    'reserved'
+);*/
+
