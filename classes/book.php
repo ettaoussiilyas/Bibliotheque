@@ -256,7 +256,7 @@ class Book
                 return false;
             }
 
-            // Préparer les données
+            // prepare request
             $updateData = [
                 'id' => $data['book_id'],
                 'title' => $data['title'],
@@ -267,7 +267,7 @@ class Book
                 'status' => $data['status']
             ];
 
-            // Debug - Afficher la requête
+            // Debug - shoing debugging
             //error_log("Données à mettre à jour: " . print_r($updateData, true));
 
             $query = "UPDATE " . $this->table_name . " 

@@ -16,11 +16,9 @@ if (!$books) {
 #search book scope
 
 
-if (
-    isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
-) {
-    $book->handleAjaxRequest($_POST);
+if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+        $book->handleAjaxRequest($_POST);
     exit;
 }
 
