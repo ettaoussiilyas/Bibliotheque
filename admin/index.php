@@ -70,15 +70,15 @@ $allUsers = $u->getAllUsers();
                 .then(data => {
                     document.getElementById('content').innerHTML = data;
                 });
-                ele.classList.add("text-gray-700", "bg-gray-100");
-                var allele = document.querySelectorAll("a .mr-3");
-                allele.forEach(e => {
-                    if(e.parentElement !== ele){
-                        e.parentElement.classList.remove("bg-gray-100", "text-gray-700");
-                        e.parentElement.classList.add("text-gray-600", "hover:bg-gray-50");
-                        
-                    }
-                })
+            ele.classList.add("text-gray-700", "bg-gray-100");
+            var allele = document.querySelectorAll("a .mr-3");
+            allele.forEach(e => {
+                if (e.parentElement !== ele) {
+                    e.parentElement.classList.remove("bg-gray-100", "text-gray-700");
+                    e.parentElement.classList.add("text-gray-600", "hover:bg-gray-50");
+
+                }
+            })
         }
         loadPage(document.querySelector("a"), './dashboard.php');
     </script>

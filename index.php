@@ -106,16 +106,9 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
                             </p>
                         </div>
                         <div class="flex justify-between items-center">
-                            <a href="#"
-                                onclick="showBookDetails({
-                                   title: '<?php echo addslashes($book['title']); ?>', 
-                                   author: '<?php echo addslashes($book['author']); ?>', 
-                                   status: '<?php echo $book['status']; ?>', 
-                                   category_name: '<?php echo addslashes($book['category_name'] ?? 'Non catégorisé'); ?>', 
-                                   cover_image: '<?php echo addslashes($book['cover_image']); ?>',
-                                   summary: '<?php echo addslashes($book['summary'] ?? 'Aucun résumé disponible'); ?>'
-                               })"
-                                class="bg-[#3498DB] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[#2980B9] transition-colors duration-300">
+                            <a href="#" 
+                               onclick="showModal('<?php echo $book['id']; ?>')"
+                               class="bg-[#3498DB] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[#2980B9] transition-colors duration-300">
                                 <i class="fas fa-info-circle mr-1"></i>
                                 Détails
                             </a>
@@ -132,49 +125,62 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
     </div>
 
     <!-- Modal pour les détails -->
-    <div id="bookModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-2xl font-bold text-gray-800" id="modalTitle"></h3>
-                <button onclick="closeModal()" class="text-gray-600 hover:text-gray-800">
-                    <i class="fas fa-times text-2xl"></i>
-                </button>
-            </div>
-            <div class="mt-4">
-                <div class="flex flex-col md:flex-row gap-6">
-                    <div class="w-full md:w-1/3" id="modalImage">
-                        <!-- L'image sera insérée ici -->
-                    </div>
-                    <div class="w-full md:w-2/3">
-                        <div class="space-y-4">
-                            <p class="flex items-center text-gray-600">
-                                <i class="fas fa-user text-[#3498DB] mr-2 w-6"></i>
-                                <span id="modalAuthor"></span>
-                            </p>
-                            <p class="flex items-center text-gray-600">
-                                <i class="fas fa-bookmark text-[#3498DB] mr-2 w-6"></i>
-                                <span id="modalCategory"></span>
-                            </p>
-                            <p class="flex items-center text-gray-600">
-                                <i class="fas fa-info-circle text-[#3498DB] mr-2 w-6"></i>
-                                <span id="modalStatus"></span>
-                            </p>
-                            <div class="mt-4">
-                                <h4 class="text-lg font-semibold mb-2">Résumé</h4>
-                                <p class="text-gray-600" id="modalSummary"></p>
+    <?php foreach ($books as $book): ?>
+        <div id="modal_<?php echo $book['id']; ?>" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold text-gray-800">
+                        <?php echo htmlspecialchars($book['title']); ?>
+                    </h3>
+                    <button onclick="closeModal('<?php echo $book['id']; ?>')" class="text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+                <div class="mt-4">
+                    <div class="flex flex-col md:flex-row gap-6">
+                        <div class="w-full md:w-1/3">
+                            <img src="<?php echo htmlspecialchars($book['cover_image']); ?>"
+                                 alt="<?php echo htmlspecialchars($book['title']); ?>"
+                                 class="w-full h-full object-contain p-2"
+                                 onerror="this.src='https://via.placeholder.com/200x300?text=Image+non+disponible'">
+                        </div>
+                        <div class="w-full md:w-2/3">
+                            <div class="space-y-4">
+                                <p class="flex items-center text-gray-600">
+                                    <i class="fas fa-user text-[#3498DB] mr-2 w-6"></i>
+                                    <?php echo htmlspecialchars($book['author']); ?>
+                                </p>
+                                <p class="flex items-center text-gray-600">
+                                    <i class="fas fa-bookmark text-[#3498DB] mr-2 w-6"></i>
+                                    <?php echo isset($book['category_name']) ? htmlspecialchars($book['category_name']) : 'Non catégorisé'; ?>
+                                </p>
+                                <p class="flex items-center text-gray-600">
+                                    <i class="fas fa-info-circle text-[#3498DB] mr-2 w-6"></i>
+                                    <span class="<?php echo $book['status'] === 'available' ? 'text-green-500' : 
+                                        ($book['status'] === 'borrowed' ? 'text-red-500' : 'text-yellow-500'); ?>">
+                                        <?php echo $book['status'] === 'available' ? 'Disponible' : 
+                                            ($book['status'] === 'borrowed' ? 'Emprunté' : 'Réservé'); ?>
+                                    </span>
+                                </p>
+                                <div class="mt-4">
+                                    <h4 class="text-lg font-semibold mb-2">Résumé</h4>
+                                    <p class="text-gray-600">
+                                        <?php echo isset($book['summary']) ? htmlspecialchars($book['summary']) : 'Aucun résumé disponible'; ?>
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="mt-6 flex justify-end">
-                    <a href="login.php" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full text-sm font-medium transition-colors duration-300">
-                        <i class="fas fa-book-reader mr-1"></i>
-                        Emprunter
-                    </a>
+                    <div class="mt-6 flex justify-end">
+                        <a href="login.php" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full text-sm font-medium transition-colors duration-300">
+                            <i class="fas fa-book-reader mr-1"></i>
+                            Emprunter
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    <?php endforeach; ?>
 
 <script src="javascript/index.js" ></script>
 </body>

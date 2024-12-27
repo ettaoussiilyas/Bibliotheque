@@ -62,7 +62,7 @@ class borrowings
         return ['success' => false, 'message' => 'Le livre ne peut pas être réservé'];
     }
 
-    public function getUserBorrowing($user_id){
+    public function getUserBorrowing($user_id) {
         $query = "SELECT 
                     b.*, 
                     books.title, 
@@ -74,7 +74,14 @@ class borrowings
                     CASE 
                         WHEN books.status = 'reserved' THEN 'reserved'
                         ELSE 'borrowed'
-                    END as borrow_status
+                    END as borrow_status,
+                    (
+                        SELECT COUNT(*) + 1
+                        FROM borrowings sub 
+                        WHERE sub.book_id = b.book_id 
+                        AND sub.return_date IS NULL 
+                        AND sub.borrow_date < b.borrow_date
+                    ) as queue_position
                  FROM borrowings b
                  JOIN books ON b.book_id = books.id
                  WHERE b.user_id = ? 
@@ -83,26 +90,6 @@ class borrowings
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute([$user_id]);
-        $emprunts = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        foreach ($emprunts as &$emprunt) {
-            $query_queue = "SELECT COUNT(*) + 1 as position
-                          FROM borrowings 
-                          WHERE book_id = ? 
-                          AND return_date IS NULL 
-                          AND borrow_date < ?";
-
-            $stmt = $this->conn->prepare($query_queue);
-            $stmt->execute([
-                $emprunt['book_id'], 
-                $emprunt['borrow_date'] ?? date('Y-m-d')
-            ]);
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            $emprunt['queue_position'] = $result['position'];
-        }
-        unset($emprunt);
-        
-        return $emprunts;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

@@ -18,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     switch($_POST['action']) {
         case 'add':
             if ($book->addBook($_POST)) {
+                
                 header('Location: bookCrud.php?success=added');
             } else {
                 $_SESSION['book_errors'] = $book->getErrors();
