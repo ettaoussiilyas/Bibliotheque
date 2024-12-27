@@ -83,5 +83,17 @@ class User{
             return $users;
         }
     }
+
+
+    public function delete($email){
+        $this->email = $email;
+        $this->conn = null;
+        $this->db = new DataBase();
+        $this->conn = $this->db->getConnection();
+        $query = "DELETE FROM users WHERE email = :email";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':email', $this->email);
+        return $stmt->execute() ? true : false;
+    }
     
 }

@@ -64,23 +64,88 @@ $allUsers = $u->getAllUsers();
     </div>
 
     <script>
+        var current;
         function loadPage(ele, page) {
             fetch(page)
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById('content').innerHTML = data;
+                    current = ele.textContent.trim().toLowerCase();
+                    switch (current) {
+                        case "users":
+                            users();
+                            break;
+                    }
                 });
-                ele.classList.add("text-gray-700", "bg-gray-100");
-                var allele = document.querySelectorAll("a .mr-3");
-                allele.forEach(e => {
-                    if(e.parentElement !== ele){
-                        e.parentElement.classList.remove("bg-gray-100", "text-gray-700");
-                        e.parentElement.classList.add("text-gray-600", "hover:bg-gray-50");
-                        
+            ele.classList.add("text-gray-700", "bg-gray-100");
+            var allele = document.querySelectorAll("a .mr-3");
+
+            allele.forEach(e => {
+                if (e.parentElement !== ele) {
+                    e.parentElement.classList.remove("bg-gray-100", "text-gray-700");
+                    e.parentElement.classList.add("text-gray-600", "hover:bg-gray-50");
+
+                }
+
+            });
+
+        }
+        function showDelete(ele){
+            const deleteButtons = document.querySelectorAll('button[title="Delete"]');
+            const deleteModal = document.getElementById('deleteModal');
+            const cancelDelete = document.getElementById('cancelDelete');
+            const confirmDelete = document.getElementById('confirmDelete');
+            deleteModal.classList.remove('hidden');
+            cancelDelete.addEventListener('click', () => {
+                deleteModal.classList.add('hidden');
+            });
+
+            confirmDelete.addEventListener('click', () => {
+                var email = ele.parentElement.parentElement.querySelectorAll('td')[1].textContent.trim();
+                fetch(`/api/deleteUser.php?user=${email}`).then(response => response.text()).then(res => {
+                    if(data !== "ok"){
+                        alert("Error Occured While deleting user!");
                     }
                 })
+                deleteModal.classList.add('hidden');
+            });
+
+        }
+        function users() {
+            
+            const deleteButtons = document.querySelectorAll('button[title="Delete"]');
+            const deleteModal = document.getElementById('deleteModal');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    showDelete(button);
+                });
+            });
+
+            
+
+            const editButtons = document.querySelectorAll('button[title="Edit"]');
+            const editModal = document.getElementById('editModal');
+            const cancelEdit = document.getElementById('cancelEdit');
+            const editUserForm = document.getElementById('editUserForm');
+
+            editButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    editModal.classList.remove('hidden');
+                });
+            });
+
+            cancelEdit.addEventListener('click', () => {
+                editModal.classList.add('hidden');
+            });
+
+            editUserForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                editModal.classList.add('hidden');
+            });
+
         }
         loadPage(document.querySelector("a"), './dashboard.php');
+
     </script>
 </body>
 
