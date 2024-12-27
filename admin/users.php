@@ -6,54 +6,22 @@ $allUsers = $u->getAllUsers();
 
 ?>
 
+<?php
+
+require_once '../classes/User.php';
+$u = new User();
+$allUsers = $u->getAllUsers();
+
+?>
+
        
             <div class="p-8">
                 <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
+                    <h2 class="text-2xl font-bold text-gray-800">Users</h2>
 
                 </div>
 
-                <!-- Stats cards -->
-                <div class="grid grid-cols-3 gap-6 mb-8">
-                    <div class="bg-white p-6 rounded-lg shadow-sm">
-                        <div class="flex items-center">
-                            <div
-                                class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-white">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <div class="ml-4">
-                                <h3 class="text-sm text-gray-500">Total clients</h3>
-                                <p class="text-2xl font-bold">6389</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-white p-6 rounded-lg shadow-sm">
-                        <div class="flex items-center">
-                            <div
-                                class="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-white">
-                                <i class="fas fa-book"></i>
-                            </div>
-                            <div class="ml-4">
-                                <h3 class="text-sm text-gray-500">Total Books</h3>
-                                <p class="text-2xl font-bold">$46,760.89</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-white p-6 rounded-lg shadow-sm">
-                        <div class="flex items-center">
-                            <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white">
-                                <i class="fas fa-ticket"></i>
-                            </div>
-                            <div class="ml-4">
-                                <h3 class="text-sm text-gray-500">Total Empreinted Books</h3>
-                                <p class="text-2xl font-bold">376</p>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-            </div>
+                
             <div class="m-10">
                 <div class="font-sans overflow-x-auto">
                     <table class="min-w-full bg-white">
