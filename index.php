@@ -18,7 +18,7 @@ if (!$books) {
 
 if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && 
     strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
-        $book->handleAjaxRequest();
+        $book->handleAjaxRequest($_POST);
     exit;
 }
 
