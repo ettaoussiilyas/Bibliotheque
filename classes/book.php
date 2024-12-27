@@ -12,6 +12,10 @@ class Book {
     public $status;
     public $created_at;
 
+    //adding data
+    public $adding_erreur = array();
+    // private $data = array();
+
     public function __construct($conn) {
         $this->conn = $conn;
     }
@@ -134,34 +138,82 @@ class Book {
 
     //ajax handling
     public function handleAjaxRequest() {
-        if (isset($_POST['query'])) {
-            $results = $this->searchBooks($_POST['query']);
+        if (isset($data['query'])) {
+            $results = $this->searchBooks($data['query']);
             echo $this->renderResults($results);
             exit;
         }
     }
+    public function getErrors() {
+        return $this->adding_erreur;
+    }
 
-    public function addBook($title , $author, $category_id , $cover_image , $summary , $status) {
-        $this->title = $title;
-        $this->author = $author;
-        $this->category_id = $category_id;
-        $this->cover_image = $cover_image;
-        $this->summary = $summary;
-        $this->status = $status;
-        $this->created_at = date('Y-m-d H:i:s');
-        $query = "INSERT INTO " . $this->table_name . " (title, author, category_id, cover_image, summary, status, created_at) VALUES (:title, :author, :category_id, :cover_image, :summary, :status, :created_at)";
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute([
-            'title' => $title,
-            'author' => $author,
-            'category_id' => $category_id,
-            'cover_image' => $cover_image,
-            'summary' => $summary,
-            'status' => $status,
-            'created_at'=> $this->created_at
-        ]);
-        return $stmt;
+    // Optional: Add a method to check if there are errors
+    public function hasErrors() {
+        return !empty($this->adding_erreur);
+    }
 
+    public function addBook($data) {
+        // Réinitialiser les erreurs
+        $this->adding_erreur = array();
+
+        // Validation des champs
+        if (empty($data['title'])) {
+            $this->adding_erreur['title'] = "Le titre est obligatoire";
+        } elseif (strlen($data['title']) < 3) {
+            $this->adding_erreur['title'] = "Le titre doit avoir au moins 3 caractères";
+        }
+
+        if (empty($data['author'])) {
+            $this->adding_erreur['author'] = "L'auteur est obligatoire";
+        }
+
+        if (empty($data['category_id'])) {
+            $this->adding_erreur['category'] = "La catégorie est obligatoire";
+        }
+
+        if (empty($data['summary'])) {
+            $this->adding_erreur['summary'] = "Le résumé est obligatoire";
+        }
+
+        if (empty($data['status'])) {
+            $this->adding_erreur['status'] = "Le statut est obligatoire";
+        } elseif (!in_array($data['status'], ['available', 'borrowed', 'reserved'])) {
+            $this->adding_erreur['status'] = "Statut invalide";
+        }
+
+        // Si il y a des erreurs, on arrête ici
+        if (!empty($this->adding_erreur)) {
+            return false;
+        }
+
+        try {
+            // Code d'insertion dans la base de données
+            $query = "INSERT INTO " . $this->table_name . " 
+                    (title, author, category_id, cover_image, summary, status) 
+                    VALUES (:title, :author, :category_id, :cover_image, :summary, :status)";
+            
+            $stmt = $this->conn->prepare($query);
+            $result = $stmt->execute([
+                'title' => $data['title'],
+                'author' => $data['author'],
+                'category_id' => $data['category_id'],
+                'cover_image' => $data['cover_image'] ?? '',
+                'summary' => $data['summary'],
+                'status' => $data['status']
+            ]);
+
+            if (!$result) {
+                $this->adding_erreur['database'] = "Erreur lors de l'ajout du livre";
+                return false;
+            }
+
+            return true;
+
+        } catch (PDOException $e) {
+            $this->adding_erreur['database'] = "Erreur de base de données: " . $e->getMessage();
+            return false;
+        }
     }
 
     public function deleteBook($id){
@@ -172,6 +224,63 @@ class Book {
         ]);
         return $stmt;
 
+    }
+
+    public function getBookById($id) {
+        $query = "SELECT * FROM " . $this->table_name . " WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function updateBook($data) {
+        try {
+            // Debug - Afficher les données reçues
+            error_log("Données reçues dans updateBook: " . print_r($data, true));
+
+            // Validation basique
+            if (empty($data['book_id'])) {
+                $this->adding_erreur['id'] = "ID du livre manquant";
+                return false;
+            }
+
+            // Préparer les données
+            $updateData = [
+                'id' => $data['book_id'],
+                'title' => $data['title'],
+                'author' => $data['author'],
+                'category_id' => $data['category_id'],
+                'cover_image' => $data['cover_image'] ?? '',
+                'summary' => $data['summary'] ?? '',
+                'status' => $data['status']
+            ];
+
+            // Debug - Afficher la requête
+            //error_log("Données à mettre à jour: " . print_r($updateData, true));
+
+            $query = "UPDATE " . $this->table_name . " 
+                    SET title = :title, 
+                        author = :author, 
+                        category_id = :category_id, 
+                        cover_image = :cover_image, 
+                        summary = :summary, 
+                        status = :status 
+                    WHERE id = :id";
+            
+            $stmt = $this->conn->prepare($query);
+            $result = $stmt->execute($updateData);
+
+            if (!$result) {
+                $this->adding_erreur['database'] = "Erreur lors de la mise à jour: " . print_r($stmt->errorInfo(), true);
+                return false;
+            }
+
+            return true;
+
+        } catch (PDOException $e) {
+            $this->adding_erreur['database'] = "Erreur de base de données: " . $e->getMessage();
+            return false;
+        }
     }
 
 }
