@@ -16,9 +16,11 @@ if (!$books) {
 #search book scope
 
 
-if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && 
-    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
-        $book->handleAjaxRequest();
+if (
+    isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
+) {
+    $book->handleAjaxRequest($_POST);
     exit;
 }
 
@@ -65,11 +67,11 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
         </div>
     </div>
     <div class="search-container">
-        <input type="text" 
-               id="search" 
-               class="search-input" 
-               placeholder="Search for a book" 
-               name="query">
+        <input type="text"
+            id="search"
+            class="search-input"
+            placeholder="Search for a book"
+            name="query">
         <div id="result"></div>
     </div>
     <!-- Books Grid -->
@@ -176,7 +178,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
         </div>
     </div>
 
-<script src="javascript/index.js" ></script>
+    <script src="javascript/index.js"></script>
 </body>
 
 </html>

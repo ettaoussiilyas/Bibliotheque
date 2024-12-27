@@ -43,7 +43,7 @@ class borrowings
             $stmt->execute([$book_id]);
 
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            $position = $result['total'] + 1;
+            $position = $result['total'] ;
 
             $query = "INSERT INTO borrowings (user_id, book_id, borrow_date) 
                      VALUES (?, ?, CURRENT_DATE)";

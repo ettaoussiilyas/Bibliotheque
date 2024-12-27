@@ -142,7 +142,7 @@ class Book
     }
 
     //ajax handling
-    public function handleAjaxRequest()
+    public function handleAjaxRequest($data)
     {
         if (isset($data['query'])) {
             $results = $this->searchBooks($data['query']);
