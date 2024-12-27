@@ -14,12 +14,12 @@ $allUsers = $u->getAllUsers();
 
 ?>
 
-       
-            <div class="p-8">
-                <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-2xl font-bold text-gray-800">Users</h2>
 
-                </div>
+<div class="p-8">
+    <div class="flex justify-between items-center mb-8">
+        <h2 class="text-2xl font-bold text-gray-800">Users</h2>
+
+    </div>
 
                 
             <div class="m-10">
