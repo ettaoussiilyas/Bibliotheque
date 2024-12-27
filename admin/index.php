@@ -51,10 +51,10 @@ $allUsers = $u->getAllUsers();
                 </a>
             </nav>
             <div class="p-4 mt-8">
-                <button
-                    class="w-full transition-all font-bold bg-red-100 text-red-500 px-4 py-2 rounded-lg hover:bg-red-200 hover:text-red-700">
-                    Logout
-                </button>
+                <a href="../logout.php"
+                    class="w-full transition-all font-bold bg-red-100 text-red-500 px-4 py-2 rounded-lg hover:bg-red-200 hover:text-red-700 block text-center">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                </a>
             </div>
         </aside>
 
