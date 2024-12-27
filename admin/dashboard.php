@@ -55,7 +55,7 @@ $borrowed = $book->borrowed();
                             </div>
                             <div class="ml-4">
                                 <h3 class="text-sm text-gray-500">Total Empreinted Books</h3>
-                                <p class="text-2xl font-bold"><?php echo $borrowed->count; ?></p>
+                                <p class="text-2xl font-bold"><?= $borrowed['count']; ?></p>
                             </div>
                         </div>
                     </div>
