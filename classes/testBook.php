@@ -29,7 +29,7 @@ $book = new Book($conn);
 //     echo "Error deleting book";
 // }
 
-/******************delete book********************* */
+/******************insert book********************* */
 // INSERT INTO books (title, author, category_id, cover_image, summary, status) VALUES
 // (
 //     'The Great Gatsby',
