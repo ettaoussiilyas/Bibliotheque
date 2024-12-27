@@ -1,9 +1,18 @@
 <?php
 
 require_once '../classes/User.php';
+include_once '../config/db.php';
+include_once '../classes/book.php';
+
+$database = new DataBase();
+$conn = $database->getConnection();
+
+$book = new Book($conn);   
+
 $u = new User();
 $allUsers = $u->getAllUsers();
-
+$result = $book->getAllBooks()->fetchAll(PDO::FETCH_ASSOC);
+$borrowed = $book->borrowed();
 ?>
 
        
@@ -23,7 +32,7 @@ $allUsers = $u->getAllUsers();
                             </div>
                             <div class="ml-4">
                                 <h3 class="text-sm text-gray-500">Total clients</h3>
-                                <p class="text-2xl font-bold">6389</p>
+                                <p class="text-2xl font-bold"><?= count($allUsers) ?></p>
                             </div>
                         </div>
                     </div>
@@ -35,7 +44,7 @@ $allUsers = $u->getAllUsers();
                             </div>
                             <div class="ml-4">
                                 <h3 class="text-sm text-gray-500">Total Books</h3>
-                                <p class="text-2xl font-bold">$46,760.89</p>
+                                <p class="text-2xl font-bold"><?= count($result) ?></p>
                             </div>
                         </div>
                     </div>
@@ -46,7 +55,7 @@ $allUsers = $u->getAllUsers();
                             </div>
                             <div class="ml-4">
                                 <h3 class="text-sm text-gray-500">Total Empreinted Books</h3>
-                                <p class="text-2xl font-bold">376</p>
+                                <p class="text-2xl font-bold"><?php echo $borrowed->count; ?></p>
                             </div>
                         </div>
                     </div>
