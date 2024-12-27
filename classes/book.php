@@ -114,9 +114,9 @@ class Book {
                         "class='bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300'>" .
                         "<i class='fas fa-book-reader mr-1'></i>Emprunter</a>";
                 
-                $output .= "</div>"; // Close buttons container
-                $output .= "</div>"; // Close book details section
-                $output .= "</div>"; // Close main card container
+                $output .= "</div>"; // closelose buttons container
+                $output .= "</div>"; // closelose book details section
+                $output .= "</div>"; // closelose main card container
             }
 
             
@@ -137,11 +137,6 @@ class Book {
     }
     public function getErrors() {
         return $this->adding_erreur;
-    }
-
-    // Optional: Add a method to check if there are errors
-    public function hasErrors() {
-        return !empty($this->adding_erreur);
     }
 
     public function addBook($data) {
@@ -235,7 +230,7 @@ class Book {
                 return false;
             }
 
-            // Préparer les données
+            // prepare request
             $updateData = [
                 'id' => $data['book_id'],
                 'title' => $data['title'],
@@ -246,7 +241,7 @@ class Book {
                 'status' => $data['status']
             ];
 
-            // Debug - Afficher la requête
+            // Debug - shoing debugging
             //error_log("Données à mettre à jour: " . print_r($updateData, true));
 
             $query = "UPDATE " . $this->table_name . " 
