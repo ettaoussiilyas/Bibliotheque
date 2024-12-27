@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($category->addingCategory($_POST)) {
                 header('Location: categorycrud.php?success=added');
             } else {
-                $_SESSION['category_errors'] = $category->getErrors();
+                $_SESSION['category_errors'] = $category->getErrorMessage();
                 header('Location: categorycrud.php?error=add');
             }
             exit;
