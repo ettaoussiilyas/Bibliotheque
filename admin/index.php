@@ -49,6 +49,11 @@ $allUsers = $u->getAllUsers();
                     <i class="fas fa-bar-chart mr-3"></i>
                     Statistics
                 </a>
+                <a href="#" onclick="loadPage(this, './user-books.php')"
+                    class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-50">
+                    <i class="fas fa-book-reader mr-3"></i>
+                    Emprunts
+                </a>
             </nav>
             <div class="p-4 mt-8">
                 <a href="../logout.php"
@@ -70,26 +75,46 @@ $allUsers = $u->getAllUsers();
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById('content').innerHTML = data;
-                    current = ele.textContent.trim().toLowerCase();
-                    switch (current) {
-                        case "users":
-                            users();
-                            break;
-                    }
+                    initializeEvents();
                 });
             ele.classList.add("text-gray-700", "bg-gray-100");
             var allele = document.querySelectorAll("a .mr-3");
-
             allele.forEach(e => {
                 if (e.parentElement !== ele) {
                     e.parentElement.classList.remove("bg-gray-100", "text-gray-700");
                     e.parentElement.classList.add("text-gray-600", "hover:bg-gray-50");
-
                 }
-
             });
-
         }
+
+        function initializeEvents() {
+            const returnForms = document.querySelectorAll('form');
+            returnForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    if (confirm('Êtes-vous sûr de vouloir marquer ce livre comme retourné ?')) {
+                        const formData = new FormData(this);
+                        
+                        fetch('./user-books.php', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => {
+                            const empruntsLink = document.querySelector('a[onclick*="user-books.php"]');
+                            if (empruntsLink) {
+                                loadPage(empruntsLink, './user-books.php');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Une erreur est survenue lors du retour du livre.');
+                        });
+                    }
+                });
+            });
+        }
+
         function showDelete(ele){
             const deleteButtons = document.querySelectorAll('button[title="Delete"]');
             const deleteModal = document.getElementById('deleteModal');
@@ -143,6 +168,14 @@ $allUsers = $u->getAllUsers();
                 editModal.classList.add('hidden');
             });
 
+        }
+        function reloadUserBooks() {
+            fetch('./user-books.php')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('content').innerHTML = data;
+                    initializeUserBooks();
+                });
         }
         loadPage(document.querySelector("a"), './dashboard.php');
 
