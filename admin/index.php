@@ -34,7 +34,7 @@ $allUsers = $u->getAllUsers();
                     <i class="fas fa-user mr-3"></i>
                     Users
                 </a>
-                <a href="#" onclick="loadPage(this, './books.php')"
+                <a href="#" onclick="loadPage(this, './bookCrud.php')"
                     class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-50">
                     <i class="fa-solid fa-book mr-3"></i>
                     Books
@@ -188,6 +188,18 @@ $allUsers = $u->getAllUsers();
 
         function closeEditModal() {
             document.getElementById('editCategoryModal').classList.add('hidden');
+        }
+
+        function sendNow(email, name, date){
+            fetch(`/api/sendEmail.php?email=${email}&name=${name}&date=${date}`).then(response => response.text()).then(data => {
+                switch(data){
+                    case 'ok':
+                        document.querySelector('button[title="SendEmail"]').classList.add("hidden");
+                        break;
+                    default:
+                        alert("Error Sending the email");
+                                    }
+            })
         }
     </script>
 </body>

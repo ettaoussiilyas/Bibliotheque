@@ -304,5 +304,13 @@ class Book
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public function mostBorrowed(){
+        $query = "SELECT b.title, b.author, c.name as category, COUNT(br.id) as times_borrowed FROM books b LEFT JOIN borrowings br ON b.id = br.book_id LEFT JOIN categories c ON b.category_id = c.id GROUP BY b.id, b.title, b.author, c.name ORDER BY times_borrowed DESC;";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 }
 ?>
