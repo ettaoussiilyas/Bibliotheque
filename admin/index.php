@@ -87,6 +87,8 @@ $allUsers = $u->getAllUsers();
             });
         }
 
+        //
+
         function initializeEvents() {
             const returnForms = document.querySelectorAll('form');
             returnForms.forEach(form => {
