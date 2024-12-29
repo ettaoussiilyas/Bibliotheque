@@ -2,7 +2,11 @@
 include_once '../config/db.php';
 include_once '../classes/borrowings.php';
 include_once '../classes/book.php';
-
+session_start();
+if(!isset($_SESSION['role']) || ($_SESSION['role'] !== 'admin')){
+    header('Location: index.php');
+    exit;
+}
 $database = new DataBase();
 $conn = $database->getConnection();
 
@@ -165,7 +169,7 @@ $borrowings = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </td>
                         <td class="px-4 py-3">
                             <?php if (!$borrow['return_date'] && $borrow['due_date']): ?>
-                                <form  method="POST" style="display: inline;">
+                                <form id="returnform" method="POST" style="display: inline;">
                                     <input type="hidden" name="return_book" value="1">
                                     <input type="hidden" name="book_id" value="<?= $borrow['book_id'] ?>">
                                     <input type="hidden" name="user_id" value="<?= $borrow['user_id'] ?>">

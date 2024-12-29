@@ -1,9 +1,33 @@
 <?php
-
+session_start();
+if(!isset($_SESSION['role']) || ($_SESSION['role'] !== 'admin')){
+    header('Location: ../index.php');
+    exit;
+}
 require_once '../classes/User.php';
 $u = new User();
 $allUsers = $u->getAllUsers();
-
+if(isset($_GET['success'])){
+    echo '<div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white p-6 rounded shadow-lg">
+                <h2 class="text-xl font-bold mb-4">Success</h2>
+                <p class="mb-4">' . htmlspecialchars($_GET['success']) . '</p>
+                <div class="flex justify-end">
+                    <button class="px-4 py-2 bg-green-500 text-white rounded" onclick="this.parentElement.parentElement.parentElement.classList.add(\'hidden\')">Ok</button>
+                </div>
+            </div>
+        </div>';
+}elseif (isset($_GET['error'])) {
+    echo '<div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white p-6 rounded shadow-lg">
+                <h2 class="text-xl font-bold mb-4">Success</h2>
+                <p class="mb-4">' . htmlspecialchars($_GET['error']) . '</p>
+                <div class="flex justify-end">
+                    <button class="px-4 py-2 bg-red-500 text-white rounded" onclick="this.parentElement.parentElement.parentElement.classList.add(\'hidden\')">Ok</button>
+                </div>
+            </div>
+        </div>';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -75,7 +99,16 @@ $allUsers = $u->getAllUsers();
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById('content').innerHTML = data;
-                    initializeEvents();
+                    current = ele.textContent.trim().toLowerCase();
+                    switch (current) {
+                        case "users":
+                            users();
+                            break;
+                        case 'emprunts':
+                            initializeEvents();
+                            break;
+                    }
+                    
                 });
             ele.classList.add("text-gray-700", "bg-gray-100");
             var allele = document.querySelectorAll("a .mr-3");
@@ -90,8 +123,7 @@ $allUsers = $u->getAllUsers();
         //
 
         function initializeEvents() {
-            const returnForms = document.querySelectorAll('form');
-            returnForms.forEach(form => {
+            const form = document.querySelector('#returnform');
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
                     
@@ -114,7 +146,6 @@ $allUsers = $u->getAllUsers();
                         });
                     }
                 });
-            });
         }
 
         function showDelete(ele){
@@ -235,6 +266,35 @@ $allUsers = $u->getAllUsers();
                         alert("Error Sending the email");
                                     }
             })
+        }
+
+        function showAddFormBooks() {
+            document.getElementById('addBookModal').classList.remove('hidden');
+        }
+
+        function closeAddModalBooks() {
+            document.getElementById('addBookModal').classList.add('hidden');
+        }
+
+        function showEditFormBooks(book) {
+            // Debug - Afficher les données reçues
+            console.log('Données du livre:', book);
+            
+            // Remplir le formulaire
+            document.getElementById('edit_book_id').value = book.id;
+            document.getElementById('edit_title').value = book.title;
+            document.getElementById('edit_author').value = book.author;
+            document.getElementById('edit_category_id').value = book.category_id;
+            document.getElementById('edit_cover_image').value = book.cover_image || '';
+            document.getElementById('edit_summary').value = book.summary || '';
+            document.getElementById('edit_status').value = book.status;
+            
+            // Afficher le modal
+            document.getElementById('editBookModal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editBookModal').classList.add('hidden');
         }
     </script>
 </body>

@@ -190,6 +190,7 @@ class Book
         } elseif (!in_array($data['status'], ['available', 'borrowed', 'reserved'])) {
             $this->adding_erreur['status'] = "Statut invalide";
         }
+        
 
         // Si il y a des erreurs, on arrête ici
         if (!empty($this->adding_erreur)) {
@@ -310,6 +311,25 @@ class Book
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    public function getBookStatistics() {
+        try {
+            $stats = [];
+            
+            // Total des livres
+            $stmt = $this->conn->query("SELECT COUNT(*) FROM books");
+            $stats['total_books'] = $stmt->fetchColumn();
+            
+            // Total des emprunts
+            $stmt = $this->conn->query("SELECT COUNT(*) FROM borrowings");
+            $stats['total_borrowings'] = $stmt->fetchColumn();
+            
+            return $stats;
+        } catch(PDOException $e) {
+            return [];
+        }
     }
 
 }

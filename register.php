@@ -1,6 +1,17 @@
 <?php 
 
 session_start();
+if(isset($_SESSION['role'])){
+    switch ($_SESSION['role']) {
+        case 'authenticated':
+            header('Location: user.php');
+            break;
+        case 'admin':
+            header('Location: /admin/index.php');
+        
+    }
+    exit;
+}
 
 ?>
 
