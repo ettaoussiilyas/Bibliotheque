@@ -39,7 +39,7 @@ $allUsers = $u->getAllUsers();
                     <i class="fa-solid fa-book mr-3"></i>
                     Books
                 </a>
-                <a href="#" onclick="loadPage(this, './categories.php')"
+                <a href="#" onclick="loadPage(this, './categorycrud.php')"
                     class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-50">
                     <i class="fas fa-list-alt mr-3"></i>
                     Categories
@@ -127,10 +127,15 @@ $allUsers = $u->getAllUsers();
             const editModal = document.getElementById('editModal');
             const cancelEdit = document.getElementById('cancelEdit');
             const editUserForm = document.getElementById('editUserForm');
-
+            var ee;
             editButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     editModal.classList.remove('hidden');
+                    ee = button;
+                    editModal.querySelector("#editName").value = button.parentElement.parentElement.querySelectorAll('td')[0].textContent.trim();
+                    editModal.querySelector("#editEmail").value = button.parentElement.parentElement.querySelectorAll('td')[1].textContent.trim();
+                    editModal.querySelector("#editRole").value = button.parentElement.parentElement.querySelectorAll('td')[2].textContent.trim();
+                    
                 });
             });
 
@@ -140,12 +145,50 @@ $allUsers = $u->getAllUsers();
 
             editUserForm.addEventListener('submit', (e) => {
                 e.preventDefault();
+                console.log(ee);
+                var email = ee.parentElement.parentElement.querySelectorAll('td')[1].textContent.trim(),
+                newemail = editModal.querySelector("#editEmail").value,
+                newname = editModal.querySelector("#editName").value,
+                newrole = editModal.querySelector("#editRole").value;
+                fetch(`/api/updateUser.php?email=${email}&newemail=${newemail}&newname=${newname}&newrole=${newrole}`).then(response => response.text()).then(res => {
+                    if(data !== "ok"){
+                        alert("Error Occured While deleting user!");
+                    }
+                })
                 editModal.classList.add('hidden');
             });
 
         }
         loadPage(document.querySelector("a"), './dashboard.php');
 
+
+
+
+
+        function showAddForm() {
+            document.getElementById('addCategoryModal').classList.remove('hidden');
+        }
+
+        function closeAddModal() {
+            document.getElementById('addCategoryModal').classList.add('hidden');
+        }
+
+        function showEditForm(category) {
+            // Debug - Afficher les données reçues
+            console.log('Données du livre:', category);
+            
+            // Remplir le formulaire
+            // document.getElementById('edit_category_id').value = category.category_id;
+            document.getElementById('edit_category_id').value = category.id;
+            document.getElementById('edit_name').value = category.name;
+            
+            // Afficher le modal
+            document.getElementById('editCategoryModal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editCategoryModal').classList.add('hidden');
+        }
     </script>
 </body>
 

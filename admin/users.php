@@ -46,7 +46,7 @@ $allUsers = $u->getAllUsers();
                         </thead>
 
                         <tbody class="whitespace-nowrap">
-                            <?php foreach (array_slice($allUsers, 0, 5) as $user): ?>
+                            <?php foreach ($allUsers as $user): ?>
                                 <tr class="hover:bg-gray-50">
                                     <td class="p-4 text-[15px] text-gray-800">
                                         <?php echo htmlspecialchars($user['name']); ?>
