@@ -3,7 +3,11 @@
 require_once '../classes/User.php';
 include_once '../config/db.php';
 include_once '../classes/book.php';
-
+session_start();
+if(!isset($_SESSION['role']) || ($_SESSION['role'] !== 'admin')){
+    header('Location: index.php');
+    exit;
+}
 $database = new DataBase();
 $conn = $database->getConnection();
 

@@ -1,7 +1,11 @@
 <?php
 include_once '../config/db.php';
 include_once '../classes/book.php';
-
+session_start();
+if(!isset($_SESSION['role']) || ($_SESSION['role'] !== 'admin')){
+    header('Location: ../index.php');
+    exit;
+}
 $database = new DataBase();
 $conn = $database->getConnection();
 
@@ -19,27 +23,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         case 'add':
             if ($book->addBook($_POST)) {
                 
-                header('Location: bookCrud.php?success=added');
+                header('Location: index.php?success=added');
             } else {
                 $_SESSION['book_errors'] = $book->getErrors();
-                header('Location: bookCrud.php?error=add');
+                header('Location: index.php?error=add');
             }
             exit;
 
         case 'edit':
             if ($book->updateBook($_POST)) {
-                header('Location: bookCrud.php?success=updated');
+                header('Location: index.php?success=updated');
             } else {
                 $_SESSION['book_errors'] = $book->getErrors();
-                header('Location: bookCrud.php?error=edit');
+                header('Location: index.php?error=edit');
             }
             exit;
 
         case 'delete':
             if ($book->deleteBook($_POST['book_id'])) {
-                header('Location: bookCrud.php?success=deleted');
+                header('Location: index.php?success=deleted');
             } else {
-                header('Location: bookCrud.php?error=delete');
+                header('Location: index.php?error=delete');
             }
             exit;
     }
@@ -66,7 +70,7 @@ if (isset($_GET['edit'])) {
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold text-gray-900">Book Management</h1>
-            <button onclick="showAddForm()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
+            <button onclick="showAddFormBooks()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
                 <i class="fas fa-plus mr-2"></i>Add New Book
             </button>
         </div>
@@ -103,7 +107,7 @@ if (isset($_GET['edit'])) {
                             </p>
                         </div>
                         <div class="flex justify-between items-center">
-                            <button onclick='showEditForm(<?php echo json_encode([
+                            <button onclick='showEditFormBooks(<?php echo json_encode([
                                 "id" => $book["id"],
                                 "title" => $book["title"],
                                 "author" => $book["author"],
@@ -115,7 +119,7 @@ if (isset($_GET['edit'])) {
                                     class="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600">
                                 <i class="fas fa-edit mr-1"></i>Edit
                             </button>
-                            <form action="" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this book?');">
+                            <form action="bookCrud.php" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this book?');">
                                 <input type="hidden" name="action" value="delete">
                                 <input type="hidden" name="book_id" value="<?php echo $book['id']; ?>">
                                 <button type="submit" 
@@ -135,7 +139,7 @@ if (isset($_GET['edit'])) {
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-2xl font-bold text-gray-800">Add New Book</h3>
-                <button onclick="closeAddModal()" class="text-gray-600 hover:text-gray-800">
+                <button onclick="closeAddModalBooks()" class="text-gray-600 hover:text-gray-800">
                     <i class="fas fa-times text-2xl"></i>
                 </button>
             </div>
@@ -194,7 +198,7 @@ if (isset($_GET['edit'])) {
                 </div>
 
                 <div class="flex justify-end space-x-3">
-                    <button type="button" onclick="closeAddModal()"
+                    <button type="button" onclick="closeAddModalBooks()"
                             class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
                         Cancel
                     </button>
@@ -288,35 +292,6 @@ if (isset($_GET['edit'])) {
         </div>
     </div>
 
-    <script>
-        function showAddForm() {
-            document.getElementById('addBookModal').classList.remove('hidden');
-        }
-
-        function closeAddModal() {
-            document.getElementById('addBookModal').classList.add('hidden');
-        }
-
-        function showEditForm(book) {
-            // Debug - Afficher les données reçues
-            console.log('Données du livre:', book);
-            
-            // Remplir le formulaire
-            document.getElementById('edit_book_id').value = book.id;
-            document.getElementById('edit_title').value = book.title;
-            document.getElementById('edit_author').value = book.author;
-            document.getElementById('edit_category_id').value = book.category_id;
-            document.getElementById('edit_cover_image').value = book.cover_image || '';
-            document.getElementById('edit_summary').value = book.summary || '';
-            document.getElementById('edit_status').value = book.status;
-            
-            // Afficher le modal
-            document.getElementById('editBookModal').classList.remove('hidden');
-        }
-
-        function closeEditModal() {
-            document.getElementById('editBookModal').classList.add('hidden');
-        }
-    </script>
+    
 </body>
 </html>

@@ -1,7 +1,11 @@
 <?php 
 include_once '../config/db.php';
 include_once '../classes/book.php';
-
+session_start();
+if(!isset($_SESSION['role']) || ($_SESSION['role'] !== 'admin')){
+    header('Location: index.php');
+    exit;
+}
 $database = new DataBase();
 $conn = $database->getConnection();
 
@@ -18,6 +22,11 @@ $books = $book->mostBorrowed();
     <!-- Most Borrowed Books -->
     <div class="mb-8">
         <h3 class="text-lg font-semibold mb-4">Most Borrowed Books</h3>
+        <div class="flex justify-end mb-4">
+            <a href="/api/generateRapport.php" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-200">
+                Generate Statistics
+            </a>
+        </div>
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <table class="min-w-full">
                 <thead class="bg-gray-50">
@@ -30,6 +39,7 @@ $books = $book->mostBorrowed();
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     <?php foreach ($books as $book): ?>
+                    <?php if($book['times_borrowed'] === 0){ return; } ?>
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap"><?php echo htmlspecialchars($book['title']); ?></td>
                         <td class="px-6 py-4 whitespace-nowrap"><?php echo htmlspecialchars($book['author']); ?></td>

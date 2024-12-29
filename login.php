@@ -1,6 +1,17 @@
 <?php 
 
 session_start();
+if(isset($_SESSION['role'])){
+    switch ($_SESSION['role']) {
+        case 'authenticated':
+            header('Location: user.php');
+            break;
+        case 'admin':
+            header('Location: /admin/index.php');
+        
+    }
+    exit;
+}
 
 ?>
 <!DOCTYPE html>
@@ -139,7 +150,7 @@ session_start();
                     document.location = './user.php';
                     break;
                 case 'admin/dashboard.php':
-                    document.location = './admin/dashboard.php';
+                    document.location = './admin/';
                     break;
                 default:
                     break;
