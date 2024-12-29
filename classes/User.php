@@ -95,5 +95,19 @@ class User{
         $stmt->bindParam(':email', $this->email);
         return $stmt->execute() ? true : false;
     }
+
+    public function update($email, $newEmail, $newName, $newRole){
+        $this->email = $email;
+        $this->conn = null;
+        $this->db = new DataBase();
+        $this->conn = $this->db->getConnection();
+        $query = "UPDATE users SET email = :newemail, name = :name, role = :role WHERE email = :email";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':email', $this->email);
+        $stmt->bindParam(':newemail', $newEmail);
+        $stmt->bindParam(':name', $newName);
+        $stmt->bindParam(':role', $newRole);
+        return $stmt->execute() ? true : false;
+    }
     
 }

@@ -11,12 +11,12 @@
     $category = new Categoty($conn);
     $category_all_rows = $category->getAllCategorys();
 
-    echo '<pre>';
-    print_r($category_all_rows);
-    echo '</pre>';
-    echo '<hr>';
-    // print_r($category_all_rows['name']);
-    echo '<hr>';
+    // echo '<pre>';
+    // print_r($category_all_rows);
+    // echo '</pre>';
+    // echo '<hr>';
+    // // print_r($category_all_rows['name']);
+    // echo '<hr>';
 
     $errors = isset($_SESSION['category_errors']) ? $_SESSION['category_errors'] : [];
     unset($_SESSION['category_errors']);
@@ -64,17 +64,7 @@ if (isset($_GET['edit'])) {
 
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Category Management</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body class="bg-gray-100">
-    <!-- categoy Grid -->
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold text-gray-900">Category Management</h1>
@@ -195,31 +185,3 @@ if (isset($_GET['edit'])) {
         </div>
     </div>
 
-    <script>
-        function showAddForm() {
-            document.getElementById('addCategoryModal').classList.remove('hidden');
-        }
-
-        function closeAddModal() {
-            document.getElementById('addCategoryModal').classList.add('hidden');
-        }
-
-        function showEditForm(category) {
-            // Debug - Afficher les données reçues
-            console.log('Données du livre:', category);
-            
-            // Remplir le formulaire
-            // document.getElementById('edit_category_id').value = category.category_id;
-            document.getElementById('edit_category_id').value = category.id;
-            document.getElementById('edit_name').value = category.name;
-            
-            // Afficher le modal
-            document.getElementById('editCategoryModal').classList.remove('hidden');
-        }
-
-        function closeEditModal() {
-            document.getElementById('editCategoryModal').classList.add('hidden');
-        }
-    </script>
-</body>
-</html>
