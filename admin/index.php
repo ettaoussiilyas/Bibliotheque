@@ -122,8 +122,10 @@ if(isset($_GET['success'])){
         }
 
         function initializeEvents() {
-            const forms = document.querySelectorAll('form[id^="returnForm_"]');
+            const forms = document.querySelectorAll('#returnform');
             forms.forEach(form => {
+
+            
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
                     

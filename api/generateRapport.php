@@ -87,8 +87,8 @@ $('#downloadPdf').click(function(event) {
     pdf.addImage($(pdfCanvas)[0], 'PNG', 0, 0);
     pdf.save('library_statistics.pdf');
 });
-$('#downloadPdf').click();
-document.location = '../admin/';
+//$('#downloadPdf').click();
+//document.location = '../admin/';
     </script>
 </body>
 </html></body></head>
