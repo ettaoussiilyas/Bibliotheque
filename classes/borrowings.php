@@ -36,32 +36,36 @@ class borrowings
             return ['success' => true, 'message' => 'Le livre a été emprunté avec succès'];
         }
 
-        if ($book['status'] === 'borrowed') {
-            $count = "SELECT COUNT(*) as total 
-                     FROM borrowings 
-                     WHERE book_id = ? 
-                     AND return_date IS NULL 
-                     AND borrow_date > (
-                         SELECT MIN(borrow_date)
-                         FROM borrowings 
-                         WHERE book_id = ? 
-                         AND return_date IS NULL
-                     )";
-            $stmt = $this->conn->prepare($count);
-            $stmt->execute([$book_id, $book_id]);
-
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            $position = $result['total'] + 1;
-
+        if ($book['status'] === 'borrowed' || $book['status'] === 'reserved') {
             $query = "INSERT INTO borrowings (user_id, book_id, borrow_date) 
                      VALUES (?, ?, NOW())";
             $stmt = $this->conn->prepare($query);
             $stmt->execute([$id, $book_id]);
 
-            if ($position === 1) {
+            $position_query = "
+                WITH reservations AS (
+                    SELECT 
+                        id,
+                        ROW_NUMBER() OVER (ORDER BY borrow_date) - 1 as position
+                    FROM borrowings
+                    WHERE book_id = ?
+                    AND return_date IS NULL
+                    AND due_date IS NULL
+                )
+                SELECT position
+                FROM reservations
+                WHERE id = LAST_INSERT_ID()";
+            
+            $stmt = $this->conn->prepare($position_query);
+            $stmt->execute([$book_id]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $position = $result['position'];
+
+            if ($position === 0) {
                 $update = "UPDATE books SET status = 'reserved' WHERE id = ?";
                 $stmt = $this->conn->prepare($update);
                 $stmt->execute([$book_id]);
+                $position = 1;
             }
 
             return [
@@ -74,44 +78,32 @@ class borrowings
     }
 
     public function getUserBorrowing($user_id) {
-        $query = "SELECT 
-                    b.*, 
-                    books.title, 
-                    books.author, 
-                    books.cover_image, 
-                    books.status,
-                    b.borrow_date,
-                    COALESCE(b.due_date, DATE_ADD(b.borrow_date, INTERVAL 14 DAY)) as due_date,
-                    IF(b.id = (
-                        SELECT sub.id
-                        FROM borrowings sub
-                        WHERE sub.book_id = b.book_id
-                        AND sub.return_date IS NULL
-                        ORDER BY sub.borrow_date ASC
-                        LIMIT 1
-                    ), 'borrowed', 'reserved') as borrow_status,
-                    CASE 
-                        WHEN b.id = (
-                            SELECT sub.id
-                            FROM borrowings sub
-                            WHERE sub.book_id = b.book_id
-                            AND sub.return_date IS NULL
-                            ORDER BY sub.borrow_date ASC
-                            LIMIT 1
-                        ) THEN NULL
-                        ELSE (
-                            SELECT COUNT(*) + 1
-                            FROM borrowings sub
-                            WHERE sub.book_id = b.book_id
-                            AND sub.return_date IS NULL
-                            AND sub.borrow_date < b.borrow_date
-                        )
-                    END as queue_position
-                 FROM borrowings b
-                 JOIN books ON b.book_id = books.id
-                 WHERE b.user_id = ? 
-                 AND b.return_date IS NULL
-                 ORDER BY b.borrow_date DESC";
+        $query = "WITH reservations AS (
+                    SELECT 
+                        b.*,
+                        books.title,
+                        books.author,
+                        books.cover_image,
+                        books.status,
+                        CASE 
+                            WHEN b.due_date IS NOT NULL THEN 'borrowed'
+                            ELSE 'reserved'
+                        END as borrow_status,
+                        CASE 
+                            WHEN b.due_date IS NOT NULL THEN NULL
+                            ELSE ROW_NUMBER() OVER (
+                                PARTITION BY b.book_id 
+                                ORDER BY b.borrow_date
+                            ) - 1
+                        END as queue_position
+                    FROM borrowings b
+                    JOIN books ON b.book_id = books.id
+                    WHERE b.return_date IS NULL
+                )
+                SELECT *
+                FROM reservations
+                WHERE user_id = ?
+                ORDER BY borrow_date DESC";
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute([$user_id]);

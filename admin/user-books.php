@@ -15,51 +15,54 @@ $borrowing = new Borrowings($conn);
 // Handle book return
 if(isset($_POST['return_book'])) {
     try {
+        $borrow_id = $_POST['return_book'];
         $book_id = $_POST['book_id'];
         $user_id = $_POST['user_id'];
         
-        // Commencer une transaction
         $conn->beginTransaction();
         
-        // l'emprunteur actuel
-        $check_query = "SELECT id FROM borrowings 
-                       WHERE book_id = ? 
-                       AND return_date IS NULL 
-                       ORDER BY borrow_date ASC 
-                       LIMIT 1";
-        $stmt = $conn->prepare($check_query);
-        $stmt->execute([$book_id]);
-        $current_borrow = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        //le livre retourne
+        // 1. Marquer le livre comme retourné pour l'utilisateur actuel
         $query = "UPDATE borrowings SET return_date = NOW() 
-                WHERE book_id = ? AND user_id = ? AND return_date IS NULL";
+                WHERE id = ? AND book_id = ? AND user_id = ? AND return_date IS NULL";
         $stmt = $conn->prepare($query);
-        $result1 = $stmt->execute([$book_id, $user_id]);
+        $result1 = $stmt->execute([$borrow_id, $book_id, $user_id]);
 
-        // verification  des reservations
-        $query = "SELECT id, user_id 
-                 FROM borrowings 
-                 WHERE book_id = ? 
-                 AND return_date IS NULL 
-                 ORDER BY borrow_date ASC 
-                 LIMIT 1";
+        // 2. Vérifier s'il y a des réservations en attente
+        $query = "SELECT b.id, b.user_id, 
+                        (SELECT COUNT(*) 
+                         FROM borrowings sub 
+                         WHERE sub.book_id = b.book_id 
+                         AND sub.return_date IS NULL 
+                         AND sub.due_date IS NULL 
+                         AND sub.borrow_date < b.borrow_date) as position
+                 FROM borrowings b
+                 WHERE b.book_id = ? 
+                 AND b.return_date IS NULL 
+                 AND b.due_date IS NULL
+                 ORDER BY b.borrow_date ASC 
+                 LIMIT 2";
         $stmt = $conn->prepare($query);
         $stmt->execute([$book_id]);
-        $nextUser = $stmt->fetch(PDO::FETCH_ASSOC);
+        $nextUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        if ($nextUser) {
+        if (!empty($nextUsers)) {
+            // Donner le livre au premier utilisateur en attente
             $query = "UPDATE borrowings 
                      SET due_date = DATE_ADD(NOW(), INTERVAL 14 DAY)
                      WHERE id = ?";
             $stmt = $conn->prepare($query);
-            $stmt->execute([$nextUser['id']]);
+            $stmt->execute([$nextUsers[0]['id']]);
             
-            $query = "UPDATE books SET status = 'borrowed' WHERE id = ?";
+            // S'il y a un deuxième utilisateur en attente, marquer comme 'reserved'
+            if (count($nextUsers) > 1) {
+                $query = "UPDATE books SET status = 'reserved' WHERE id = ?";
+            } else {
+                $query = "UPDATE books SET status = 'borrowed' WHERE id = ?";
+            }
             $stmt = $conn->prepare($query);
             $result2 = $stmt->execute([$book_id]);
         } else {
-           
+            // Pas d'utilisateur en attente, marquer le livre comme disponible
             $query = "UPDATE books SET status = 'available' WHERE id = ?";
             $stmt = $conn->prepare($query);
             $result2 = $stmt->execute([$book_id]);
@@ -169,8 +172,8 @@ $borrowings = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </td>
                         <td class="px-4 py-3">
                             <?php if (!$borrow['return_date'] && $borrow['due_date']): ?>
-                                <form id="returnform" method="POST" style="display: inline;">
-                                    <input type="hidden" name="return_book" value="1">
+                                <form method="POST" style="display: inline;" id="returnForm_<?= $borrow['borrow_id'] ?>">
+                                    <input type="hidden" name="return_book" value="<?= $borrow['borrow_id'] ?>">
                                     <input type="hidden" name="book_id" value="<?= $borrow['book_id'] ?>">
                                     <input type="hidden" name="user_id" value="<?= $borrow['user_id'] ?>">
                                     <button type="submit" 

@@ -1,3 +1,4 @@
+
 <?php
 session_start();
 if(!isset($_SESSION['role']) || ($_SESSION['role'] !== 'admin')){
@@ -120,10 +121,9 @@ if(isset($_GET['success'])){
             });
         }
 
-        //
-
         function initializeEvents() {
-            const form = document.querySelector('#returnform');
+            const forms = document.querySelectorAll('form[id^="returnForm_"]');
+            forms.forEach(form => {
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
                     
@@ -135,10 +135,12 @@ if(isset($_GET['success'])){
                             body: formData
                         })
                         .then(response => {
-                            const empruntsLink = document.querySelector('a[onclick*="user-books.php"]');
-                            if (empruntsLink) {
-                                loadPage(empruntsLink, './user-books.php');
-                            }
+                        
+                                const empruntsLink = document.querySelector('a[onclick*="user-books.php"]');
+                                if (empruntsLink) {
+                                    loadPage(empruntsLink, './user-books.php');
+                                }
+                           
                         })
                         .catch(error => {
                             console.error('Error:', error);
@@ -146,6 +148,7 @@ if(isset($_GET['success'])){
                         });
                     }
                 });
+            });
         }
 
         function showDelete(ele){
