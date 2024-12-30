@@ -298,7 +298,7 @@ class Book
 
     public function borrowed()
     {
-        $query = "SELECT COUNT(*) as count FROM books WHERE status = 'borrowed'";
+        $query = "SELECT COUNT(*) as count FROM books WHERE status = 'borrowed' OR status = 'reserved'";
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute();

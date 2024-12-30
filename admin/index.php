@@ -121,7 +121,10 @@ if(isset($_GET['success'])){
         }
 
         function initializeEvents() {
-            const form = document.querySelector('#returnform');
+            const forms = document.querySelectorAll('#returnform');
+            forms.forEach(form => {
+
+            
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
                     
@@ -144,6 +147,7 @@ if(isset($_GET['success'])){
                         });
                     }
                 });
+            });
         }
 
         function showDelete(ele){

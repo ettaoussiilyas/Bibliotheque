@@ -92,7 +92,7 @@ if (isset($_GET['edit'])) {
                         ]); ?>)' class="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600">
                             <i class="fas fa-edit mr-1"></i>Edit
                         </button>
-                        <form action="" method="POST" class="inline"
+                        <form action="categorycrud.php" method="POST" class="inline"
                             onsubmit="return confirm('Are you sure you want to delete this book?');">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="category_id" value="<?php echo $category_all_row['id']; ?>">
