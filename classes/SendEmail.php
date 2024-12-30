@@ -29,7 +29,7 @@ class SendEmail
             $mail->Host = 'smtp.naver.com';
             $mail->SMTPAuth = true;
             $mail->Username = 'droiders@naver.com';
-            $mail->Password = 'SL^usw3w9*RZZ6R';
+            $mail->Password = '';
             $mail->SMTPSecure = "tls";
             $mail->Port = 587;
 

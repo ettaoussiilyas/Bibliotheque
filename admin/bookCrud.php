@@ -12,8 +12,7 @@ $conn = $database->getConnection();
 $book = new Book($conn);
 $books = $book->getAllBooks();
 
-// Get errors if they exist in session
-session_start();
+
 $errors = isset($_SESSION['book_errors']) ? $_SESSION['book_errors'] : [];
 unset($_SESSION['book_errors']);
 
