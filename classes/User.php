@@ -72,16 +72,25 @@ class User{
         $this->db->disconnect(); 
     }
 
-    public function getAllUsers(){
+    public function getAllUsers() {
         $this->conn = null;
         $this->db = new DataBase();
         $this->conn = $this->db->getConnection();
-        $query = "SELECT name,email, role, created_at FROM users ORDER BY created_at DESC";
+        $query = "SELECT DISTINCT 
+                    u.*,
+                    b.due_date,
+                    CASE 
+                        WHEN b.due_date < CURRENT_DATE AND b.return_date IS NULL THEN 1
+                        ELSE 0
+                    END as needs_email
+                  FROM users u
+                  LEFT JOIN borrowings b ON u.id = b.user_id
+                  ORDER BY needs_email DESC, u.created_at DESC";
+                  
         $stmt = $this->conn->prepare($query);
-        if ($stmt->execute()) {
-            $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            return $users;
-        }
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
 
@@ -93,6 +102,20 @@ class User{
         $query = "DELETE FROM users WHERE email = :email";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':email', $this->email);
+        return $stmt->execute() ? true : false;
+    }
+
+    public function update($email, $newEmail, $newName, $newRole){
+        $this->email = $email;
+        $this->conn = null;
+        $this->db = new DataBase();
+        $this->conn = $this->db->getConnection();
+        $query = "UPDATE users SET email = :newemail, name = :name, role = :role WHERE email = :email";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':email', $this->email);
+        $stmt->bindParam(':newemail', $newEmail);
+        $stmt->bindParam(':name', $newName);
+        $stmt->bindParam(':role', $newRole);
         return $stmt->execute() ? true : false;
     }
     

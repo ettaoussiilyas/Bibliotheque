@@ -1,6 +1,7 @@
 <?php 
 
 session_start();
+
 include '../classes/User.php';
 if($_SERVER['REQUEST_METHOD'] === 'POST'){
     $json = file_get_contents('php://input');

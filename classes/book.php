@@ -190,6 +190,7 @@ class Book
         } elseif (!in_array($data['status'], ['available', 'borrowed', 'reserved'])) {
             $this->adding_erreur['status'] = "Statut invalide";
         }
+        
 
         // Si il y a des erreurs, on arrête ici
         if (!empty($this->adding_erreur)) {
@@ -297,11 +298,38 @@ class Book
 
     public function borrowed()
     {
-        $query = "SELECT COUNT(*) as count FROM books WHERE status = 'borrowed'";
+        $query = "SELECT COUNT(*) as count FROM books WHERE status = 'borrowed' OR status = 'reserved'";
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function mostBorrowed(){
+        $query = "SELECT b.title, b.author, c.name as category, COUNT(br.id) as times_borrowed FROM books b LEFT JOIN borrowings br ON b.id = br.book_id LEFT JOIN categories c ON b.category_id = c.id GROUP BY b.id, b.title, b.author, c.name ORDER BY times_borrowed DESC;";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    public function getBookStatistics() {
+        try {
+            $stats = [];
+            
+            // Total des livres
+            $stmt = $this->conn->query("SELECT COUNT(*) FROM books");
+            $stats['total_books'] = $stmt->fetchColumn();
+            
+            // Total des emprunts
+            $stmt = $this->conn->query("SELECT COUNT(*) FROM borrowings");
+            $stats['total_borrowings'] = $stmt->fetchColumn();
+            
+            return $stats;
+        } catch(PDOException $e) {
+            return [];
+        }
     }
 
 }

@@ -1,18 +1,37 @@
 <?php
-
 require_once '../classes/User.php';
+require_once '../config/db.php';
+session_start();
+if(!isset($_SESSION['role']) || ($_SESSION['role'] !== 'admin')){
+    header('Location: index.php');
+    exit;
+}
+// Function to check if date is past due
+function check($dateString) {
+    if (!$dateString) return false;
+    $dueDate = new DateTime($dateString);
+    $currentDate = new DateTime();
+    return $currentDate > $dueDate;
+}
+
+// Get users
 $u = new User();
 $allUsers = $u->getAllUsers();
 
+// Remove duplicates while keeping priority for users with overdue books
+$uniqueUsers = [];
+foreach ($allUsers as $user) {
+    $userId = $user['id'];
+    // Keep user if not seen before or if they have an overdue book
+    if (!isset($uniqueUsers[$userId]) || 
+        ($user['due_date'] && check($user['due_date']))) {
+        $uniqueUsers[$userId] = $user;
+    }
+}
+$allUsers = array_values($uniqueUsers);
+
 ?>
 
-<?php
-
-require_once '../classes/User.php';
-$u = new User();
-$allUsers = $u->getAllUsers();
-
-?>
 
 
 <div class="p-8">
@@ -46,7 +65,7 @@ $allUsers = $u->getAllUsers();
                         </thead>
 
                         <tbody class="whitespace-nowrap">
-                            <?php foreach (array_slice($allUsers, 0, 5) as $user): ?>
+                            <?php foreach ($allUsers as $user): ?>
                                 <tr class="hover:bg-gray-50">
                                     <td class="p-4 text-[15px] text-gray-800">
                                         <?php echo htmlspecialchars($user['name']); ?>
@@ -83,6 +102,16 @@ $allUsers = $u->getAllUsers();
                                                     data-original="#000000" />
                                             </svg>
                                         </button>
+                                        <?php 
+                                            if($user['needs_email']){
+                                                echo '<button onclick=\'sendNow("' . $user["email"] . '", "' . $user["name"] . '", "' . $user["due_date"] . '")\' class="mr-4" title="SendEmail">
+                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                class="w-5 fill-yellow-400 hover:fill-yellow-500" viewBox="0 0 24 24">
+  <path d="M21 8V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-3M21 8l-9 6-9-6M3 19V5" data-original="#000000"/>
+                                            </svg>
+                                        </button>';
+                                            }
+                                        ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
