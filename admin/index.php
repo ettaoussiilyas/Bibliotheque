@@ -5,9 +5,7 @@ if(!isset($_SESSION['role']) || ($_SESSION['role'] !== 'admin')){
     header('Location: ../index.php');
     exit;
 }
-require_once '../classes/User.php';
-$u = new User();
-$allUsers = $u->getAllUsers();
+
 if(isset($_GET['success'])){
     echo '<div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
             <div class="bg-white p-6 rounded shadow-lg">

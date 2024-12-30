@@ -172,7 +172,7 @@ $borrowings = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </td>
                         <td class="px-4 py-3">
                             <?php if (!$borrow['return_date'] && $borrow['due_date']): ?>
-                                <form method="POST" style="display: inline;" id="returnForm_<?= $borrow['borrow_id'] ?>">
+                                <form method="POST" style="display: inline;" id="returnform">
                                     <input type="hidden" name="return_book" value="<?= $borrow['borrow_id'] ?>">
                                     <input type="hidden" name="book_id" value="<?= $borrow['book_id'] ?>">
                                     <input type="hidden" name="user_id" value="<?= $borrow['user_id'] ?>">
