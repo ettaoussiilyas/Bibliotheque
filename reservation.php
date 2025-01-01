@@ -124,6 +124,20 @@ $my_borrowings = $borrowing->getUserBorrowing($_SESSION['id']);
                                         ?>
                                     </span>
                                 </p>
+                                <div class="mt-4">
+                                    <button onclick="showBookDetails({
+                                        title: '<?php echo addslashes($borrow['title']); ?>', 
+                                        author: '<?php echo addslashes($borrow['author']); ?>', 
+                                        status: '<?php echo $borrow['status']; ?>', 
+                                        category_name: '<?php echo addslashes($borrow['category_name'] ?? 'Non catégorisé'); ?>', 
+                                        cover_image: '<?php echo addslashes($borrow['cover_image']); ?>',
+                                        summary: '<?php echo addslashes($borrow['summary'] ?? 'Aucun résumé disponible'); ?>',
+                                        id: <?php echo $borrow['book_id']; ?>
+                                    })" class="bg-[#3498DB] text-white px-6 py-3 rounded-full text-base font-medium hover:bg-[#2980B9] transition-colors duration-300">
+                                        <i class="fas fa-info-circle mr-2"></i>
+                                        Détails
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -131,5 +145,47 @@ $my_borrowings = $borrowing->getUserBorrowing($_SESSION['id']);
             </div>
         <?php endif; ?>
     </div>
+
+    <!-- Modal pour les détails -->
+    <div id="bookModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold text-gray-800" id="modalTitle"></h3>
+                <button onclick="closeModal()" class="text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <div class="mt-4">
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="w-full md:w-1/3" id="modalImage">
+                        <!-- L'image sera insérée ici -->
+                    </div>
+                    <div class="w-full md:w-2/3">
+                        <div class="space-y-4">
+                            <p class="flex items-center text-gray-600">
+                                <i class="fas fa-user text-[#3498DB] mr-2 w-6"></i>
+                                <span id="modalAuthor"></span>
+                            </p>
+                            <p class="flex items-center text-gray-600">
+                                <i class="fas fa-bookmark text-[#3498DB] mr-2 w-6"></i>
+                                <span id="modalCategory"></span>
+                            </p>
+                            <p class="flex items-center text-gray-600">
+                                <i class="fas fa-info-circle text-[#3498DB] mr-2 w-6"></i>
+                                <span id="modalStatus"></span>
+                            </p>
+                            <div class="mt-4">
+                                <h4 class="text-lg font-semibold mb-2">Résumé</h4>
+                                <p class="text-gray-600" id="modalSummary"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              
+            </div>
+        </div>
+    </div>
+
+    <script src="javascript/index.js"></script>
 </body>
 </html> 
