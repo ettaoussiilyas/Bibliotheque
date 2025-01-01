@@ -332,5 +332,99 @@ class Book
         }
     }
 
+    public function returnBook($borrow_id, $book_id, $user_id) {
+        try {
+            $this->conn->beginTransaction();
+            
+            $query = "UPDATE borrowings SET return_date = NOW() 
+                    WHERE id = ? AND book_id = ? AND user_id = ? AND return_date IS NULL";
+            $stmt = $this->conn->prepare($query);
+            $result1 = $stmt->execute([$borrow_id, $book_id, $user_id]);
+
+            //  des réservations en attente
+            $query = "SELECT b.id, b.user_id, 
+                            (SELECT COUNT(*) 
+                             FROM borrowings sub 
+                             WHERE sub.book_id = b.book_id 
+                             AND sub.return_date IS NULL 
+                             AND sub.due_date IS NULL 
+                             AND sub.borrow_date < b.borrow_date) as position
+                     FROM borrowings b
+                     WHERE b.book_id = ? 
+                     AND b.return_date IS NULL 
+                     AND b.due_date IS NULL
+                     ORDER BY b.borrow_date ASC 
+                     LIMIT 2";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([$book_id]);
+            $nextUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (!empty($nextUsers)) {
+                
+                $query = "UPDATE borrowings 
+                         SET due_date = DATE_ADD(NOW(), INTERVAL 14 DAY)
+                         WHERE id = ?";
+                $stmt = $this->conn->prepare($query);
+                $stmt->execute([$nextUsers[0]['id']]);
+                
+                if (count($nextUsers) > 1) {
+                    $query = "UPDATE books SET status = 'reserved' WHERE id = ?";
+                } else {
+                    $query = "UPDATE books SET status = 'borrowed' WHERE id = ?";
+                }
+                $stmt = $this->conn->prepare($query);
+                $result2 = $stmt->execute([$book_id]);
+            } else {
+                $query = "UPDATE books SET status = 'available' WHERE id = ?";
+                $stmt = $this->conn->prepare($query);
+                $result2 = $stmt->execute([$book_id]);
+            }
+
+            if($result1 && $result2) {
+                $this->conn->commit();
+                return ['success' => true];
+            } else {
+                $this->conn->rollBack();
+                return ['success' => false, 'error' => 'Update failed'];
+            }
+        } catch(Exception $e) {
+            $this->conn->rollBack();
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    public function getAllBorrowings() {
+        $query = "SELECT 
+                    b.id as borrow_id,
+                    b.user_id,
+                    b.book_id,
+                    b.borrow_date,
+                    b.due_date,
+                    b.return_date,
+                    u.name as user_name,
+                    u.email as user_email,
+                    bk.title as book_title,
+                    bk.author as book_author,
+                    bk.status as book_status,
+                    CASE 
+                        WHEN b.return_date IS NOT NULL THEN 'returned'
+                        WHEN b.borrow_date = (
+                            SELECT MIN(b2.borrow_date)
+                            FROM borrowings b2
+                            WHERE b2.book_id = b.book_id
+                            AND b2.return_date IS NULL
+                        ) THEN 'borrowed'
+                        ELSE 'reserved'
+                    END as borrow_status
+                  FROM borrowings b
+                  JOIN users u ON b.user_id = u.id
+                  JOIN books bk ON b.book_id = bk.id
+                  ORDER BY b.borrow_date DESC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 }
 ?>
