@@ -21,7 +21,7 @@ if(isset($_POST['return_book'])) {
         
         $conn->beginTransaction();
         
-        // 1. Marquer le livre comme retourné pour l'utilisateur actuel
+        
         $query = "UPDATE borrowings SET return_date = NOW() 
                 WHERE id = ? AND book_id = ? AND user_id = ? AND return_date IS NULL";
         $stmt = $conn->prepare($query);
@@ -53,7 +53,7 @@ if(isset($_POST['return_book'])) {
             $stmt = $conn->prepare($query);
             $stmt->execute([$nextUsers[0]['id']]);
             
-            // S'il y a un deuxième utilisateur en attente, marquer comme 'reserved'
+            
             if (count($nextUsers) > 1) {
                 $query = "UPDATE books SET status = 'reserved' WHERE id = ?";
             } else {
@@ -62,7 +62,6 @@ if(isset($_POST['return_book'])) {
             $stmt = $conn->prepare($query);
             $result2 = $stmt->execute([$book_id]);
         } else {
-            // Pas d'utilisateur en attente, marquer le livre comme disponible
             $query = "UPDATE books SET status = 'available' WHERE id = ?";
             $stmt = $conn->prepare($query);
             $result2 = $stmt->execute([$book_id]);
@@ -84,7 +83,7 @@ if(isset($_POST['return_book'])) {
     }
 }
 
-// tout borrowings avec user info
+// borrowings avec user info
 $query = "SELECT 
             b.id as borrow_id,
             b.user_id,
