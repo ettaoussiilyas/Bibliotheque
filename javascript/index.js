@@ -7,12 +7,12 @@ function closeModal(bookId) {
 }
 
 function showBookDetails(book) {
-    console.log('Book details:', book); // Debug
+    
     document.getElementById('modalTitle').textContent = book.title;
     document.getElementById('modalAuthor').textContent = book.author;
     document.getElementById('modalCategory').textContent = book.category_name;
     
-    // Gestion du statut avec couleur
+   
     const statusElement = document.getElementById('modalStatus');
     let statusText, statusClass;
     switch (book.status) {
