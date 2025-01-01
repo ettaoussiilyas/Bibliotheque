@@ -43,34 +43,26 @@ class borrowings
             $stmt->execute([$id, $book_id]);
 
             $position_query = "
-                WITH reservations AS (
-                    SELECT 
-                        id,
-                        ROW_NUMBER() OVER (ORDER BY borrow_date) - 1 as position
-                    FROM borrowings
-                    WHERE book_id = ?
-                    AND return_date IS NULL
-                    AND due_date IS NULL
-                )
-                SELECT position
-                FROM reservations
-                WHERE id = LAST_INSERT_ID()";
+                SELECT COUNT(*) as queue_position
+                FROM borrowings 
+                WHERE book_id = ? 
+                AND return_date IS NULL 
+                AND due_date IS NULL";
             
             $stmt = $this->conn->prepare($position_query);
             $stmt->execute([$book_id]);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            $position = $result['position'];
+            $queue_position = $result['queue_position'];
 
-            if ($position === 0) {
+            if ($queue_position === 1) {
                 $update = "UPDATE books SET status = 'reserved' WHERE id = ?";
                 $stmt = $this->conn->prepare($update);
                 $stmt->execute([$book_id]);
-                $position = 1;
             }
 
             return [
                 'success' => true,
-                'message' => "Vous êtes en position $position dans la file d'attente"
+                'message' => "Réservé - Position " . $queue_position . " dans la file d'attente"
             ];
         }
 
@@ -78,26 +70,39 @@ class borrowings
     }
 
     public function getUserBorrowing($user_id) {
-        $query = "WITH reservations AS (
+        $query = "WITH first_borrower AS (
+                    SELECT book_id, MIN(borrow_date) as first_borrow_date
+                    FROM borrowings
+                    WHERE return_date IS NULL
+                    GROUP BY book_id
+                ),
+                reservations AS (
                     SELECT 
                         b.*,
                         books.title,
                         books.author,
                         books.cover_image,
                         books.status,
+                        books.summary,
                         CASE 
-                            WHEN b.due_date IS NOT NULL THEN 'borrowed'
+                            WHEN b.borrow_date = fb.first_borrow_date AND b.due_date IS NOT NULL THEN 'borrowed'
                             ELSE 'reserved'
                         END as borrow_status,
                         CASE 
                             WHEN b.due_date IS NOT NULL THEN NULL
-                            ELSE ROW_NUMBER() OVER (
-                                PARTITION BY b.book_id 
-                                ORDER BY b.borrow_date
-                            ) - 1
+                            ELSE (
+                                SELECT COUNT(*)
+                                FROM borrowings b2 
+                                WHERE b2.book_id = b.book_id 
+                                AND b2.return_date IS NULL 
+                                AND b2.due_date IS NULL
+                                AND b2.borrow_date <= b.borrow_date
+                                AND b2.id <= b.id
+                            )
                         END as queue_position
                     FROM borrowings b
                     JOIN books ON b.book_id = books.id
+                    LEFT JOIN first_borrower fb ON b.book_id = fb.book_id
                     WHERE b.return_date IS NULL
                 )
                 SELECT *

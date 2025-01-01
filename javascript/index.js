@@ -8,56 +8,56 @@ function closeModal(bookId) {
 
 function showBookDetails(book) {
     
-    document.getElementById("modalTitle").textContent = book.title;
-    document.getElementById("modalAuthor").textContent = book.author;
-    document.getElementById("modalCategory").textContent = book.category_name;
-    document.getElementById("modalSummary").textContent = book.summary;
-  
+    document.getElementById('modalTitle').textContent = book.title;
+    document.getElementById('modalAuthor').textContent = book.author;
+    document.getElementById('modalCategory').textContent = book.category_name;
     
-    var statusText, statusColor;
-    switch (book.status) {
-      case "available":
-        statusText = "Disponible";
-        statusColor = "text-green-500";
-        break;
-      case "borrowed":
-        statusText = "Emprunté";
-        statusColor = "text-red-500";
-        break;
-      default:
-        statusText = "Réservé";
-        statusColor = "text-yellow-500";
-    }
-  
-    var statusElement = document.getElementById("modalStatus");
-    statusElement.className = statusColor;
-    statusElement.textContent = statusText;
-  
-    
-    document.getElementById("modalImage").innerHTML = `
-          <img src="${
-            book.cover_image ||
-            "https://via.placeholder.com/300x400?text=Image+non+disponible"
-          }" 
-               alt="${book.title}" 
-               class="w-full rounded-lg shadow-lg" 
-               onerror="this.src='https://via.placeholder.com/300x400?text=Image+non+disponible'">
-      `;
-  
    
-    document.getElementById("bookModal").classList.remove("hidden");
-  }
-  
-  function closeModal() {
-    document.getElementById("bookModal").classList.add("hidden");
-  }
-  
-  
-  document.getElementById("bookModal").addEventListener("click", function (e) {
-    if (e.target === this) {
-      closeModal();
+    const statusElement = document.getElementById('modalStatus');
+    let statusText, statusClass;
+    switch (book.status) {
+        case 'available':
+            statusText = 'Disponible';
+            statusClass = 'text-green-500';
+            break;
+        case 'borrowed':
+            statusText = 'Emprunté';
+            statusClass = 'text-red-500';
+            break;
+        default:
+            statusText = 'Réservé';
+            statusClass = 'text-yellow-500';
     }
-  });
+    statusElement.textContent = statusText;
+    statusElement.className = statusClass;
+
+    document.getElementById('modalSummary').textContent = book.summary || 'Aucun résumé disponible';
+    
+    document.getElementById('modalImage').innerHTML = `
+        <img src="${book.cover_image || 'https://via.placeholder.com/300x400?text=Image+non+disponible'}" 
+             alt="${book.title}" 
+             class="w-full rounded-lg shadow-lg"
+             onerror="this.src='https://via.placeholder.com/300x400?text=Image+non+disponible'">
+    `;
+
+    // Mettre à jour le lien d'emprunt avec l'ID du livre
+    const borrowButton = document.getElementById('borrowButton');
+    if (borrowButton) {
+        borrowButton.href = 'reservation.php?book_id=' + book.id;
+    }
+
+    document.getElementById('bookModal').classList.remove('hidden');
+}
+
+function closeModal() {
+    document.getElementById('bookModal').classList.add('hidden');
+}
+
+document.getElementById('bookModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeModal();
+    }
+});
 
 
 //search part ajax handling
@@ -91,4 +91,5 @@ $(document).ready(function(){
         }, 300);
     });
 });
+
 

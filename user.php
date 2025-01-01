@@ -2,6 +2,10 @@
 include_once 'config/db.php';
 include_once 'classes/book.php';
 session_start();
+if(!isset($_SESSION['role'])){
+    header('Location: index.php');
+    exit;
+}
 
 $database = new DataBase();
 $conn = $database->getConnection();
@@ -132,11 +136,39 @@ if (
                                 <i class="fas fa-info-circle mr-1"></i>
                                 Détails
                             </a>
-                            <a href="reservation.php?book_id=<?php echo $book['id']; ?>"
-                                class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300">
-                                <i class="fas fa-book-reader mr-1"></i>
-                                Emprunter
-                            </a>
+                            <?php
+                            $check_query = "SELECT 
+                                            CASE 
+                                                WHEN due_date IS NOT NULL THEN 'borrowed'
+                                                ELSE 'reserved'
+                                            END as status
+                                          FROM borrowings 
+                                          WHERE user_id = ? AND book_id = ? 
+                                          AND return_date IS NULL";
+                            $stmt = $conn->prepare($check_query);
+                            $stmt->execute([$_SESSION['id'], $book['id']]);
+                            $existing_borrow = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                            if (!$existing_borrow) {
+                                
+                                ?>
+                                <a href="reservation.php?book_id=<?php echo $book['id']; ?>"
+                                    class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300">
+                                    <i class="fas fa-book-reader mr-1"></i>
+                                    Emprunter
+                                </a>
+                                <?php
+                            } else {
+                                
+                                $status_text = $existing_borrow['status'] === 'borrowed' ? 'Déjà emprunté' : 'Déjà réservé';
+                                ?>
+                                <span class="text-gray-500 px-4 py-2 rounded-full text-sm font-medium bg-gray-100">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    <?php echo $status_text; ?>
+                                </span>
+                                <?php
+                            }
+                            ?>
                         </div>
                     </div>
                 </div>
@@ -180,11 +212,11 @@ if (
                     </div>
                 </div>
                 <div class="mt-6 flex justify-end">
-                    <a href="reservation.php?book_id=<?php echo $book['id']; ?>"
+                    <!-- <a href="reservation.php?book_id=<?php echo $book['id']; ?>"
                         class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300">
                         <i class="fas fa-book-reader mr-1"></i>
                         Emprunter
-                    </a>
+                    </a> -->
                 </div>
             </div>
         </div>
