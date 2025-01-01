@@ -1,119 +1,31 @@
 <?php
 include_once '../config/db.php';
-include_once '../classes/borrowings.php';
 include_once '../classes/book.php';
+
 session_start();
 if(!isset($_SESSION['role']) || ($_SESSION['role'] !== 'admin')){
     header('Location: index.php');
     exit;
 }
+
 $database = new DataBase();
 $conn = $database->getConnection();
 
-$borrowing = new Borrowings($conn);
+$book = new Book($conn);
 
 // Handle book return
 if(isset($_POST['return_book'])) {
-    try {
-        $borrow_id = $_POST['return_book'];
-        $book_id = $_POST['book_id'];
-        $user_id = $_POST['user_id'];
-        
-        $conn->beginTransaction();
-        
-        
-        $query = "UPDATE borrowings SET return_date = NOW() 
-                WHERE id = ? AND book_id = ? AND user_id = ? AND return_date IS NULL";
-        $stmt = $conn->prepare($query);
-        $result1 = $stmt->execute([$borrow_id, $book_id, $user_id]);
-
-        // 2. Vérifier s'il y a des réservations en attente
-        $query = "SELECT b.id, b.user_id, 
-                        (SELECT COUNT(*) 
-                         FROM borrowings sub 
-                         WHERE sub.book_id = b.book_id 
-                         AND sub.return_date IS NULL 
-                         AND sub.due_date IS NULL 
-                         AND sub.borrow_date < b.borrow_date) as position
-                 FROM borrowings b
-                 WHERE b.book_id = ? 
-                 AND b.return_date IS NULL 
-                 AND b.due_date IS NULL
-                 ORDER BY b.borrow_date ASC 
-                 LIMIT 2";
-        $stmt = $conn->prepare($query);
-        $stmt->execute([$book_id]);
-        $nextUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        if (!empty($nextUsers)) {
-            // Donner le livre au premier utilisateur en attente
-            $query = "UPDATE borrowings 
-                     SET due_date = DATE_ADD(NOW(), INTERVAL 14 DAY)
-                     WHERE id = ?";
-            $stmt = $conn->prepare($query);
-            $stmt->execute([$nextUsers[0]['id']]);
-            
-            
-            if (count($nextUsers) > 1) {
-                $query = "UPDATE books SET status = 'reserved' WHERE id = ?";
-            } else {
-                $query = "UPDATE books SET status = 'borrowed' WHERE id = ?";
-            }
-            $stmt = $conn->prepare($query);
-            $result2 = $stmt->execute([$book_id]);
-        } else {
-            $query = "UPDATE books SET status = 'available' WHERE id = ?";
-            $stmt = $conn->prepare($query);
-            $result2 = $stmt->execute([$book_id]);
-        }
-
-        if($result1 && $result2) {
-            $conn->commit();
-            echo json_encode(['success' => true]);
-            exit;
-        } else {
-            $conn->rollBack();
-            echo json_encode(['success' => false, 'error' => 'Update failed']);
-            exit;
-        }
-    } catch(Exception $e) {
-        $conn->rollBack();
-        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-        exit;
-    }
+    $result = $book->returnBook(
+        $_POST['return_book'],
+        $_POST['book_id'],
+        $_POST['user_id']
+    );
+    echo json_encode($result);
+    exit;
 }
 
-// borrowings avec user info
-$query = "SELECT 
-            b.id as borrow_id,
-            b.user_id,
-            b.book_id,
-            b.borrow_date,
-            b.due_date,
-            b.return_date,
-            u.name as user_name,
-            u.email as user_email,
-            bk.title as book_title,
-            bk.author as book_author,
-            bk.status as book_status,
-            CASE 
-                WHEN b.return_date IS NOT NULL THEN 'returned'
-                WHEN b.borrow_date = (
-                    SELECT MIN(b2.borrow_date)
-                    FROM borrowings b2
-                    WHERE b2.book_id = b.book_id
-                    AND b2.return_date IS NULL
-                ) THEN 'borrowed'
-                ELSE 'reserved'
-            END as borrow_status
-          FROM borrowings b
-          JOIN users u ON b.user_id = u.id
-          JOIN books bk ON b.book_id = bk.id
-          ORDER BY b.borrow_date DESC";
-
-$stmt = $conn->prepare($query);
-$stmt->execute();
-$borrowings = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Get all borrowings
+$borrowings = $book->getAllBorrowings();
 ?>
 
 <div class="p-6">
